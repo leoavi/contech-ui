@@ -1,0 +1,71 @@
+/**
+ * Identidade Contech — tokens @theme oficiais.
+ *
+ * Use via `@import "@contech/ui/styles/contech.css"` no globals.css do app.
+ * Atualizar SEMPRE aqui (não em cópias por app).
+ *
+ * Dark mode-first: a escala chumbo é invertida (950 = texto claro, 100 = borda escura).
+ * O override de --color-white captura todos os utilitários `bg-white` dos cards.
+ */
+
+@theme {
+  /* Bordô */
+  --color-bordo-950: #2a0d14;
+  --color-bordo-700: #b8324a;
+  --color-bordo-600: #c4405b;
+  --color-bordo-500: #d8607a;
+  --color-bordo-50: #3a1820;
+
+  /* Chumbo invertido pra dark */
+  --color-chumbo-950: #f0f2f5;
+  --color-chumbo-800: #d0d4d9;
+  --color-chumbo-700: #b0b6bd;
+  --color-chumbo-500: #7a8290;
+  --color-chumbo-100: #3d4852;
+
+  /* Override do white → surface card */
+  --color-white: #242b35;
+
+  /* Suporte */
+  --color-azul: #4a7bb8;
+  --color-verde: #4ba87a;
+  --color-offwhite: #161b22;
+  --color-bege: #242b35;
+  --color-preto: #0d0c0d;
+
+  /* Semânticos */
+  --color-positive: #4ba87a;
+  --color-negative: #d8607a;
+  --color-warning: #e09347;
+  --color-neutral: #7a8290;
+
+  /* Categóricas (gráficos) */
+  --color-cat-1: #b8324a;
+  --color-cat-2: #4a7bb8;
+  --color-cat-3: #4ba87a;
+  --color-cat-4: #e09347;
+  --color-cat-5: #9aa3b0;
+  --color-cat-6: #d8607a;
+  --color-cat-7: #8a93a0;
+  --color-cat-8: #c4405b;
+
+  /* Fontes (variáveis next/font) */
+  --font-sans: var(--font-exo2), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-barlow), system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html,
+body {
+  background: var(--color-offwhite);
+  color: var(--color-chumbo-950);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  color-scheme: dark;
+}
+
+.tabular,
+.tabular * {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
