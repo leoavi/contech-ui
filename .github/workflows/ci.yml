@@ -1,0 +1,23 @@
+name: CI
+
+# Roda em todo push pra main e em todo PR.
+# Só types — biblioteca sem testes próprios por enquanto.
+# Sem secrets, funciona em fork PRs.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  types:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npx tsc --noEmit
