@@ -261,10 +261,10 @@ function RenderRow<T>({
 
 function SortIndicator({ dir }: { dir: false | "asc" | "desc" }) {
   if (dir === false) {
-    return <span className="text-chumbo-300 text-[10px]">↕</span>;
+    return <span className="text-chumbo-500 text-[10px]">↕</span>;
   }
   return (
-    <span className="text-bordo-700 text-[10px]">{dir === "asc" ? "↑" : "↓"}</span>
+    <span className="text-bordo-500 text-[10px]">{dir === "asc" ? "↑" : "↓"}</span>
   );
 }
 
