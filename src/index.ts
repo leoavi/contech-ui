@@ -19,6 +19,7 @@ export { Section } from "./components/Section";
 // Lib
 export { cn } from "./lib/cn";
 export {
+  defaultIntervalo,
   formatBRL,
   formatBRLK,
   formatBRLKForced,
@@ -32,4 +33,4 @@ export {
   formatPercent,
   formatPercentValue,
 } from "./lib/format";
-export { colors } from "./lib/colors";
+export { categorical, colors } from "./lib/colors";

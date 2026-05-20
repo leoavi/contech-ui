@@ -1,29 +1,39 @@
 import type { ReactNode } from "react";
-import { BordoBar } from "./BordoBar";
+import { cn } from "../lib/cn";
 
-interface Props {
-  title: string;
+interface SectionProps {
+  title?: string;
   description?: string;
   action?: ReactNode;
   children: ReactNode;
+  className?: string;
 }
 
-export function Section({ title, description, action, children }: Props) {
+export function Section({ title, description, action, children, className }: SectionProps) {
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-end justify-between gap-3">
-        <div className="flex gap-3">
-          <BordoBar className="mt-0.5" />
-          <div>
-            <h2 className="font-display text-base font-bold uppercase tracking-wide text-chumbo-950">
-              {title}
-            </h2>
-            {description && <p className="mt-0.5 text-xs text-chumbo-500">{description}</p>}
+    <section className={cn("flex flex-col gap-4", className)}>
+      {(title || action) && (
+        <div className="flex items-end justify-between gap-4">
+          <div className="flex items-start gap-2">
+            {title && (
+              <div
+                className="mt-1 w-[3px] self-stretch rounded-full bg-bordo-700"
+                aria-hidden
+              />
+            )}
+            <div>
+              {title && (
+                <h2 className="font-display text-lg font-bold uppercase tracking-wide text-chumbo-800">
+                  {title}
+                </h2>
+              )}
+              {description && <p className="mt-1 text-sm text-chumbo-500">{description}</p>}
+            </div>
           </div>
+          {action}
         </div>
-        {action && <div className="flex-shrink-0">{action}</div>}
-      </div>
-      <div>{children}</div>
+      )}
+      {children}
     </section>
   );
 }
