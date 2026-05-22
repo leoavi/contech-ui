@@ -9,19 +9,29 @@
  */
 
 @theme {
-  /* Bordô */
+  /* Bordô — escala completa. 50 → 500 vai de escuro pra claro
+     (porque o app é dark-mode-first: 500 é o "vibrante" no fundo escuro). */
   --color-bordo-950: #2a0d14;
   --color-bordo-700: #b8324a;
   --color-bordo-600: #c4405b;
   --color-bordo-500: #d8607a;
+  --color-bordo-300: #9a4550; /* steps 100-300: interpolados pra preencher gaps */
+  --color-bordo-200: #7a3540;
+  --color-bordo-100: #5a2530;
   --color-bordo-50: #3a1820;
 
-  /* Chumbo invertido pra dark */
+  /* Chumbo invertido pra dark — 950 = texto claro, 100 = borda escura.
+     Escala completa 50/100/200/300/400/500/600/700/800/950. */
   --color-chumbo-950: #f0f2f5;
   --color-chumbo-800: #d0d4d9;
   --color-chumbo-700: #b0b6bd;
+  --color-chumbo-600: #959fab;
   --color-chumbo-500: #7a8290;
+  --color-chumbo-400: #6d7882;
+  --color-chumbo-300: #5d6873;
+  --color-chumbo-200: #4d5862;
   --color-chumbo-100: #3d4852;
+  --color-chumbo-50: #2d353f;
 
   /* Override do white → surface card */
   --color-white: #242b35;

@@ -21,15 +21,17 @@ import {
   type Column,
   type ColumnDef,
   type ColumnFiltersState,
+  type PaginationState,
   type Row,
   type SortingState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { type ReactNode, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 export type DataTableColumn<T> = ColumnDef<T> & {
   /** Tipo de filtro a expor no popover. `false` desabilita. */
@@ -47,9 +49,11 @@ interface DataTableProps<T> {
   initialSort?: SortingState;
   /** Linha expansível inline (drill-down). */
   expandable?: (row: T) => ReactNode;
-  /** Limite de linhas visíveis. Default: 10. Acima disso vira scroll. */
+  /** Linhas por página. Default: 10. Use 0 pra desligar paginação. */
+  pageSize?: number;
+  /** @deprecated Substituído por paginação clássica. Mantido pra compatibilidade. */
   maxVisibleRows?: number;
-  /** Altura aproximada de uma linha em px. Default: 44 (3rem). */
+  /** @deprecated Sem efeito após a migração pra paginação. */
   estimatedRowHeight?: number;
   /** Mensagem quando não há dados. */
   emptyMessage?: string;
@@ -61,33 +65,44 @@ export function DataTable<T>({
   rowKey,
   initialSort = [],
   expandable,
-  maxVisibleRows = 10,
-  estimatedRowHeight = 44,
+  pageSize = 10,
   emptyMessage = "Sem registros para exibir.",
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(initialSort);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [expanded, setExpanded] = useState<Set<string | number>>(new Set());
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: pageSize > 0 ? pageSize : data.length || 1,
+  });
+
+  const paginar = pageSize > 0;
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, columnFilters },
+    state: { sorting, columnFilters, pagination },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    ...(paginar ? { getPaginationRowModel: getPaginationRowModel() } : {}),
   });
 
-  const filteredRows = table.getRowModel().rows;
   const totalRegistros = data.length;
-  const totalFiltrados = filteredRows.length;
-  const temScroll = totalFiltrados > maxVisibleRows;
+  const totalFiltrados = table.getFilteredRowModel().rows.length;
+  const visibleRows = paginar ? table.getRowModel().rows : table.getFilteredRowModel().rows;
+  const totalPaginas = paginar ? Math.max(1, Math.ceil(totalFiltrados / pagination.pageSize)) : 1;
+  const paginaAtual = pagination.pageIndex + 1;
 
-  // Header sticky + body com scroll: usamos maxHeight calculado a partir de maxVisibleRows.
-  // +1 linha pro header. Adicionamos 4px pra evitar corte na ultima linha.
-  const maxHeight = (maxVisibleRows + 1) * estimatedRowHeight + 4;
+  // Quando o conjunto filtrado encolhe, recoloca o índice de página dentro do range.
+  useEffect(() => {
+    if (paginar && pagination.pageIndex > 0 && pagination.pageIndex >= totalPaginas) {
+      setPagination((p) => ({ ...p, pageIndex: Math.max(0, totalPaginas - 1) }));
+    }
+  }, [paginar, totalPaginas, pagination.pageIndex]);
 
   function toggleExpand(key: string | number) {
     setExpanded((prev) => {
@@ -100,12 +115,9 @@ export function DataTable<T>({
 
   return (
     <div className="overflow-hidden rounded-lg border border-chumbo-100 bg-bege">
-      <div
-        className={cn("relative", temScroll && "overflow-y-auto")}
-        style={temScroll ? { maxHeight } : undefined}
-      >
+      <div className="relative">
         <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10 bg-bege/95 backdrop-blur-sm">
+          <thead className="bg-bege/95">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
@@ -163,7 +175,7 @@ export function DataTable<T>({
             ))}
           </thead>
           <tbody>
-            {filteredRows.length === 0 ? (
+            {visibleRows.length === 0 ? (
               <tr>
                 <td
                   colSpan={table.getAllColumns().length}
@@ -173,7 +185,7 @@ export function DataTable<T>({
                 </td>
               </tr>
             ) : (
-              filteredRows.map((row) => {
+              visibleRows.map((row) => {
                 const key = rowKey(row.original);
                 const isExpanded = expandable != null && expanded.has(key);
                 return (
@@ -190,23 +202,129 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
-      <div className="border-t border-chumbo-100/40 bg-bege/30 px-4 py-2 text-[11px] text-chumbo-500">
-        {totalFiltrados === totalRegistros ? (
-          <>
-            Mostrando <span className="tabular text-chumbo-700">{totalFiltrados}</span> registro
-            {totalFiltrados === 1 ? "" : "s"}
-          </>
-        ) : (
-          <>
-            Mostrando <span className="tabular text-chumbo-700">{totalFiltrados}</span> de{" "}
-            <span className="tabular text-chumbo-700">{totalRegistros}</span> registros
-            <span className="ml-1 text-chumbo-500">(filtro ativo)</span>
-          </>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-chumbo-100/40 bg-bege/30 px-4 py-2 text-[11px] text-chumbo-500">
+        <div>
+          {totalFiltrados === totalRegistros ? (
+            <>
+              <span className="tabular text-chumbo-700">{totalFiltrados}</span> registro
+              {totalFiltrados === 1 ? "" : "s"}
+            </>
+          ) : (
+            <>
+              <span className="tabular text-chumbo-700">{totalFiltrados}</span> de{" "}
+              <span className="tabular text-chumbo-700">{totalRegistros}</span> registros
+              <span className="ml-1 text-chumbo-500">(filtro ativo)</span>
+            </>
+          )}
+          {paginar && totalFiltrados > 0 && (
+            <span className="ml-2 text-chumbo-500">
+              · página{" "}
+              <span className="tabular text-chumbo-700">{paginaAtual}</span> de{" "}
+              <span className="tabular text-chumbo-700">{totalPaginas}</span>
+            </span>
+          )}
+        </div>
+        {paginar && totalPaginas > 1 && (
+          <Pagination
+            paginaAtual={paginaAtual}
+            totalPaginas={totalPaginas}
+            onChange={(p) => setPagination((s) => ({ ...s, pageIndex: p - 1 }))}
+          />
         )}
-        {temScroll && <span className="ml-2 text-chumbo-500">· role para ver mais</span>}
       </div>
     </div>
   );
+}
+
+function Pagination({
+  paginaAtual,
+  totalPaginas,
+  onChange,
+}: {
+  paginaAtual: number;
+  totalPaginas: number;
+  onChange: (p: number) => void;
+}) {
+  const paginas = useMemo(() => construirPaginacao(paginaAtual, totalPaginas), [paginaAtual, totalPaginas]);
+  return (
+    <nav className="flex items-center gap-1" aria-label="Paginação">
+      <PageButton
+        disabled={paginaAtual === 1}
+        onClick={() => onChange(Math.max(1, paginaAtual - 1))}
+        ariaLabel="Página anterior"
+      >
+        ‹
+      </PageButton>
+      {paginas.map((p, i) =>
+        p === "…" ? (
+          <span key={`gap-${i}`} className="px-1 text-chumbo-500">
+            …
+          </span>
+        ) : (
+          <PageButton
+            key={p}
+            active={p === paginaAtual}
+            onClick={() => onChange(p)}
+            ariaLabel={`Ir para página ${p}`}
+          >
+            {p}
+          </PageButton>
+        ),
+      )}
+      <PageButton
+        disabled={paginaAtual === totalPaginas}
+        onClick={() => onChange(Math.min(totalPaginas, paginaAtual + 1))}
+        ariaLabel="Próxima página"
+      >
+        ›
+      </PageButton>
+    </nav>
+  );
+}
+
+function PageButton({
+  children,
+  onClick,
+  active = false,
+  disabled = false,
+  ariaLabel,
+}: {
+  children: ReactNode;
+  onClick: () => void;
+  active?: boolean;
+  disabled?: boolean;
+  ariaLabel?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "min-w-[26px] rounded px-2 py-1 text-[11px] font-semibold tabular transition-colors",
+        active && "bg-bordo-700 text-white",
+        !active && !disabled && "text-chumbo-700 hover:bg-chumbo-100",
+        disabled && "cursor-not-allowed text-chumbo-300",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Gera lista de páginas com elipses no estilo 1 … 4 5 [6] 7 8 … 20 */
+function construirPaginacao(atual: number, total: number): (number | "…")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const paginas: (number | "…")[] = [1];
+  const ini = Math.max(2, atual - 2);
+  const fim = Math.min(total - 1, atual + 2);
+  if (ini > 2) paginas.push("…");
+  for (let p = ini; p <= fim; p++) paginas.push(p);
+  if (fim < total - 1) paginas.push("…");
+  paginas.push(total);
+  return paginas;
 }
 
 function RenderRow<T>({
@@ -370,8 +488,8 @@ function FilterPopover<T>({
                     column.setFilterValue([min, current[1]]);
                   }}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-full rounded border border-chumbo-100 px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
-                  style={{ backgroundColor: "#1b2028" }}
+                  className="w-full rounded border border-chumbo-100 bg-bege px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
+                  
                 />
                 <input
                   type="number"
@@ -383,8 +501,8 @@ function FilterPopover<T>({
                     column.setFilterValue([current[0], max]);
                   }}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-full rounded border border-chumbo-100 px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
-                  style={{ backgroundColor: "#1b2028" }}
+                  className="w-full rounded border border-chumbo-100 bg-bege px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
+                  
                 />
               </div>
             )}
