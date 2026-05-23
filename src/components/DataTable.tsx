@@ -47,6 +47,8 @@ interface DataTableProps<T> {
   rowKey: (row: T) => string | number;
   /** Sort inicial. */
   initialSort?: SortingState;
+  /** Filtros aplicados por padrão (ex: status=andamento) — usuário pode alterar. */
+  initialColumnFilters?: ColumnFiltersState;
   /** Linha expansível inline (drill-down). */
   expandable?: (row: T) => ReactNode;
   /** Linhas por página. Default: 10. Use 0 pra desligar paginação. */
@@ -64,12 +66,14 @@ export function DataTable<T>({
   columns,
   rowKey,
   initialSort = [],
+  initialColumnFilters = [],
   expandable,
   pageSize = 10,
   emptyMessage = "Sem registros para exibir.",
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(initialSort);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] =
+    useState<ColumnFiltersState>(initialColumnFilters);
   const [expanded, setExpanded] = useState<Set<string | number>>(new Set());
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
