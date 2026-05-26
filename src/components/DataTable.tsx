@@ -59,6 +59,42 @@ interface DataTableProps<T> {
   estimatedRowHeight?: number;
   /** Mensagem quando não há dados. */
   emptyMessage?: string;
+  /**
+   * Se informado, exibe botão "Exportar CSV" no rodapé.
+   * Recebe os dados filtrados e retorna array de objetos planos {coluna: valor}.
+   * Use quando a coluna tem célula customizada (ex: formatBRL) e você quer o valor bruto no CSV.
+   * Se não informado mas `exportCsv: true`, usa os valores raw do TanStack.
+   */
+  exportCsv?: true | ((rows: T[]) => Record<string, string | number | null | undefined>[]);
+  /** Nome do arquivo CSV exportado (sem extensão). Default: "dados". */
+  exportFileName?: string;
+}
+
+function exportToCsv(
+  rows: Record<string, string | number | null | undefined>[],
+  fileName: string,
+) {
+  if (rows.length === 0) return;
+  const headers = Object.keys(rows[0] ?? {});
+  const escape = (v: string | number | null | undefined): string => {
+    if (v == null) return "";
+    const s = String(v);
+    if (s.includes(",") || s.includes('"') || s.includes("\n")) {
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+    return s;
+  };
+  const csv = [
+    headers.map(escape).join(","),
+    ...rows.map((r) => headers.map((h) => escape(r[h])).join(",")),
+  ].join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${fileName}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export function DataTable<T>({
@@ -70,6 +106,8 @@ export function DataTable<T>({
   expandable,
   pageSize = 10,
   emptyMessage = "Sem registros para exibir.",
+  exportCsv,
+  exportFileName = "dados",
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(initialSort);
   const [columnFilters, setColumnFilters] =
@@ -207,25 +245,56 @@ export function DataTable<T>({
         </table>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-chumbo-100/40 bg-bege/30 px-4 py-2 text-[11px] text-chumbo-500">
-        <div>
-          {totalFiltrados === totalRegistros ? (
-            <>
-              <span className="tabular text-chumbo-700">{totalFiltrados}</span> registro
-              {totalFiltrados === 1 ? "" : "s"}
-            </>
-          ) : (
-            <>
-              <span className="tabular text-chumbo-700">{totalFiltrados}</span> de{" "}
-              <span className="tabular text-chumbo-700">{totalRegistros}</span> registros
-              <span className="ml-1 text-chumbo-500">(filtro ativo)</span>
-            </>
-          )}
-          {paginar && totalFiltrados > 0 && (
-            <span className="ml-2 text-chumbo-500">
-              · página{" "}
-              <span className="tabular text-chumbo-700">{paginaAtual}</span> de{" "}
-              <span className="tabular text-chumbo-700">{totalPaginas}</span>
-            </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <div>
+            {totalFiltrados === totalRegistros ? (
+              <>
+                <span className="tabular text-chumbo-700">{totalFiltrados}</span> registro
+                {totalFiltrados === 1 ? "" : "s"}
+              </>
+            ) : (
+              <>
+                <span className="tabular text-chumbo-700">{totalFiltrados}</span> de{" "}
+                <span className="tabular text-chumbo-700">{totalRegistros}</span> registros
+                <span className="ml-1 text-chumbo-500">(filtro ativo)</span>
+              </>
+            )}
+            {paginar && totalFiltrados > 0 && (
+              <span className="ml-2 text-chumbo-500">
+                · página{" "}
+                <span className="tabular text-chumbo-700">{paginaAtual}</span> de{" "}
+                <span className="tabular text-chumbo-700">{totalPaginas}</span>
+              </span>
+            )}
+          </div>
+          {exportCsv && totalFiltrados > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                const filteredRows = table.getFilteredRowModel().rows.map((r) => r.original);
+                if (typeof exportCsv === "function") {
+                  exportToCsv(exportCsv(filteredRows), exportFileName);
+                } else {
+                  // exportCsv === true: usa valores raw das colunas acessíveis
+                  const rows = filteredRows.map((row) => {
+                    const obj: Record<string, string | number | null | undefined> = {};
+                    for (const col of columns) {
+                      const header = typeof col.header === "string" ? col.header : col.id ?? "";
+                      const key = (col as DataTableColumn<T> & { accessorKey?: string }).accessorKey ?? col.id ?? "";
+                      obj[header] = (row as Record<string, unknown>)[key] as string | number | null | undefined;
+                    }
+                    return obj;
+                  });
+                  exportToCsv(rows, exportFileName);
+                }
+              }}
+              className="inline-flex items-center gap-1 rounded border border-chumbo-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-chumbo-700 transition-colors hover:border-bordo-700 hover:text-bordo-700"
+            >
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M8 2v9m0 0-3-3m3 3 3-3M3 13h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Exportar CSV
+            </button>
           )}
         </div>
         {paginar && totalPaginas > 1 && (
