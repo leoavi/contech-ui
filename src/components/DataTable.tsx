@@ -49,6 +49,8 @@ interface DataTableProps<T> {
   initialSort?: SortingState;
   /** Filtros aplicados por padrão (ex: status=andamento) — usuário pode alterar. */
   initialColumnFilters?: ColumnFiltersState;
+  /** Callback disparado quando o usuário altera filtros — útil pra persistir em URL/localStorage. */
+  onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
   /** Linha expansível inline (drill-down). */
   expandable?: (row: T) => ReactNode;
   /** Linhas por página. Default: 10. Use 0 pra desligar paginação. */
@@ -103,6 +105,7 @@ export function DataTable<T>({
   rowKey,
   initialSort = [],
   initialColumnFilters = [],
+  onColumnFiltersChange,
   expandable,
   pageSize = 10,
   emptyMessage = "Sem registros para exibir.",
@@ -110,8 +113,15 @@ export function DataTable<T>({
   exportFileName = "dados",
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(initialSort);
-  const [columnFilters, setColumnFilters] =
+  const [columnFilters, setColumnFiltersState] =
     useState<ColumnFiltersState>(initialColumnFilters);
+  const setColumnFilters: typeof setColumnFiltersState = (updater) => {
+    setColumnFiltersState((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      onColumnFiltersChange?.(next);
+      return next;
+    });
+  };
   const [expanded, setExpanded] = useState<Set<string | number>>(new Set());
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
