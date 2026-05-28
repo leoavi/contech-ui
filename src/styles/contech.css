@@ -12,6 +12,7 @@
   /* Bordô — escala completa. 50 → 500 vai de escuro pra claro
      (porque o app é dark-mode-first: 500 é o "vibrante" no fundo escuro). */
   --color-bordo-950: #2a0d14;
+  --color-bordo-800: #6a1e2e;
   --color-bordo-700: #b8324a;
   --color-bordo-600: #c4405b;
   --color-bordo-500: #d8607a;
@@ -21,8 +22,9 @@
   --color-bordo-50: #3a1820;
 
   /* Chumbo invertido pra dark — 950 = texto claro, 100 = borda escura.
-     Escala completa 50/100/200/300/400/500/600/700/800/950. */
+     Escala completa 50/100/200/300/400/500/600/700/800/900/950. */
   --color-chumbo-950: #f0f2f5;
+  --color-chumbo-900: #e0e3e7;
   --color-chumbo-800: #d0d4d9;
   --color-chumbo-700: #b0b6bd;
   --color-chumbo-600: #959fab;
