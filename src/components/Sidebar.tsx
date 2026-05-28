@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "../lib/cn";
@@ -91,7 +91,7 @@ export function Sidebar({
   groupIcon = DEFAULT_GROUP_ICON,
 }: SidebarProps) {
   const activePath = usePathname() ?? "/";
-  const { collapsed, toggle, mobileOpen, setMobileOpen } = useSidebar();
+  const { collapsed, toggle } = useSidebar();
   const router = useRouter();
 
   const accessibleItems = navItems.filter((item) =>
@@ -106,11 +106,6 @@ export function Sidebar({
 
   const [groupOpen, setGroupOpen] = useState(() => groupedActive);
 
-  // Fecha o drawer mobile ao navegar
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [activePath, setMobileOpen]);
-
   async function handleLogout() {
     await fetch(logoutPath, { method: "POST" });
     router.push(loginPath);
@@ -120,39 +115,12 @@ export function Sidebar({
   const w = collapsed ? "w-10" : "w-60";
 
   return (
-    <>
-      {/* Botão hambúrguer — só em mobile (< lg) */}
-      <button
-        type="button"
-        onClick={() => setMobileOpen(true)}
-        className="no-print fixed top-3 left-3 z-30 flex h-10 w-10 items-center justify-center rounded-lg border border-chumbo-100 bg-white text-chumbo-700 shadow-md lg:hidden"
-        title="Abrir menu"
-        aria-label="Abrir menu"
-      >
-        <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </button>
-
-      {/* Overlay quando o drawer mobile está aberto */}
-      {mobileOpen && (
-        <button
-          type="button"
-          onClick={() => setMobileOpen(false)}
-          className="no-print fixed inset-0 z-20 bg-black/40 lg:hidden"
-          aria-label="Fechar menu"
-        />
+    <aside
+      className={cn(
+        "no-print fixed inset-y-0 left-0 z-10 flex flex-col border-r border-chumbo-100 bg-white transition-[width] duration-200 ease-in-out",
+        w,
       )}
-
-      <aside
-        className={cn(
-          "no-print fixed inset-y-0 left-0 z-30 flex flex-col border-r border-chumbo-100 bg-white transition-[width,transform] duration-200 ease-in-out",
-          w,
-          // Mobile: drawer que desliza. Desktop (lg): sempre visível.
-          mobileOpen ? "translate-x-0" : "-translate-x-full",
-          "lg:translate-x-0 lg:z-10",
-        )}
-      >
+    >
       {/* Header: Logo + toggle */}
       <div
         className={cn(
@@ -290,8 +258,7 @@ export function Sidebar({
           </div>
         )}
       </div>
-      </aside>
-    </>
+    </aside>
   );
 }
 
