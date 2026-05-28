@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "../lib/cn";
 import { useSidebar } from "../lib/sidebar-context";
 
 /**
@@ -21,12 +22,19 @@ export function MainContent({
   hasSidebar?: boolean;
 }) {
   const { collapsed } = useSidebar();
-  const paddingX = collapsed ? "px-6" : "px-10";
+  // Mobile (< lg): sem margem (sidebar vira drawer sobreposto) + padding menor
+  // + espaço no topo pro botão hambúrguer. Desktop: margem conforme collapse.
+  const desktopMl = hasSidebar ? (collapsed ? "lg:ml-10" : "lg:ml-60") : "lg:ml-0";
+  const desktopPx = collapsed ? "lg:px-6" : "lg:px-10";
   return (
     <main
-      className={`min-h-screen ${paddingX} py-8 pb-24 transition-all duration-200 ease-in-out print:ml-0 print:px-0 print:pb-0 ${
-        hasSidebar ? (collapsed ? "ml-10" : "ml-60") : "ml-0"
-      }`}
+      className={cn(
+        "min-h-screen ml-0 px-4 py-8 pb-24 transition-all duration-200 ease-in-out",
+        hasSidebar && "max-lg:pt-16", // espaço pro botão hambúrguer
+        desktopMl,
+        desktopPx,
+        "print:ml-0 print:px-0 print:pb-0",
+      )}
     >
       <div className="mx-auto max-w-[1700px]">{children}</div>
     </main>

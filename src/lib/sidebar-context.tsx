@@ -15,9 +15,17 @@ import { createContext, useContext, useEffect, useState } from "react";
 interface SidebarCtx {
   collapsed: boolean;
   toggle: () => void;
+  /** Drawer mobile aberto (telas < lg). */
+  mobileOpen: boolean;
+  setMobileOpen: (v: boolean) => void;
 }
 
-const SidebarContext = createContext<SidebarCtx>({ collapsed: false, toggle: () => {} });
+const SidebarContext = createContext<SidebarCtx>({
+  collapsed: false,
+  toggle: () => {},
+  mobileOpen: false,
+  setMobileOpen: () => {},
+});
 
 const STORAGE_KEY = "sidebar-collapsed";
 
@@ -26,6 +34,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_KEY) === "true";
   });
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, String(collapsed));
@@ -47,7 +56,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarContext.Provider
-      value={{ collapsed, toggle: () => setCollapsed((v) => !v) }}
+      value={{ collapsed, toggle: () => setCollapsed((v) => !v), mobileOpen, setMobileOpen }}
     >
       {children}
     </SidebarContext.Provider>
