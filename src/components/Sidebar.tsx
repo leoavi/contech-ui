@@ -205,14 +205,13 @@ export function Sidebar({
                         className={cn(
                           "relative flex w-full items-center rounded-md py-2 text-sm font-medium transition-colors",
                           collapsed ? "justify-center px-1" : "gap-3 px-2",
+                          // Grupo ativo recebe só realce sutil (negrito escuro);
+                          // o vermelho forte fica reservado ao item-folha ativo.
                           active
-                            ? "bg-bordo-50 text-bordo-700"
+                            ? "font-semibold text-chumbo-950 hover:bg-chumbo-100/60"
                             : "text-chumbo-700 hover:bg-chumbo-100/60",
                         )}
                       >
-                        {active && (
-                          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-sm bg-bordo-700" />
-                        )}
                         {g.icon ?? DEFAULT_GROUP_ICON}
                         {!collapsed && (
                           <>
