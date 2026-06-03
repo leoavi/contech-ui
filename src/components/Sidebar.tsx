@@ -45,6 +45,14 @@ export interface SidebarUsuario {
   modulos: string[];
 }
 
+/** Configuração de um accordion nomeado (multi-grupo). */
+export interface SidebarGroup {
+  /** Casa com `NavItem.group`. */
+  key: string;
+  label: string;
+  icon?: ReactNode;
+}
+
 interface SidebarProps {
   navItems: NavItem[];
   usuario: SidebarUsuario;
@@ -54,10 +62,15 @@ interface SidebarProps {
   loginPath?: string;
   /** Slot opcional acima do footer (ex: badge de mês ativo do BI). */
   extras?: ReactNode;
-  /** Label do accordion quando há items agrupados (default: "Agents"). */
+  /** Label do accordion quando há items agrupados (default: "Agents"). Legado/single-group. */
   groupLabel?: string;
-  /** Ícone do accordion (default: cubo). */
+  /** Ícone do accordion (default: cubo). Legado/single-group. */
   groupIcon?: ReactNode;
+  /**
+   * Multi-grupo: define um accordion por entrada, casando `NavItem.group` com `key`.
+   * Quando informado, ignora groupLabel/groupIcon e renderiza vários accordions.
+   */
+  groups?: SidebarGroup[];
 }
 
 function temAcesso(modulos: string[], modulo: string): boolean {
@@ -89,6 +102,7 @@ export function Sidebar({
   extras,
   groupLabel = "Agents",
   groupIcon = DEFAULT_GROUP_ICON,
+  groups,
 }: SidebarProps) {
   const activePath = usePathname() ?? "/";
   const { collapsed, toggle } = useSidebar();
@@ -97,6 +111,7 @@ export function Sidebar({
   const accessibleItems = navItems.filter((item) =>
     temAcesso(usuario.modulos, item.modulo),
   );
+  const multiGroup = !!groups && groups.length > 0;
   const groupedItems = accessibleItems.filter((item) => item.group);
   const mainItems = accessibleItems.filter((item) => !item.group);
   const hasGrouped = groupedItems.length > 0;
@@ -104,7 +119,20 @@ export function Sidebar({
     (item) => activePath === item.href || activePath.startsWith(item.href),
   );
 
+  const itemAtivo = (item: NavItem) =>
+    activePath === item.href || (item.href !== "/" && activePath.startsWith(item.href));
+
   const [groupOpen, setGroupOpen] = useState(() => groupedActive);
+  // Multi-grupo: estado aberto/fechado por chave (abre os que contêm rota ativa).
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const o: Record<string, boolean> = {};
+    if (groups) {
+      for (const g of groups) {
+        o[g.key] = accessibleItems.some((it) => it.group === g.key && itemAtivo(it));
+      }
+    }
+    return o;
+  });
 
   async function handleLogout() {
     await fetch(logoutPath, { method: "POST" });
@@ -158,61 +186,123 @@ export function Sidebar({
             />
           ))}
 
-          {hasGrouped && (
-            <>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (collapsed) return;
-                    setGroupOpen((o) => !o);
-                  }}
-                  title={collapsed ? groupLabel : undefined}
-                  className={cn(
-                    "relative flex w-full items-center rounded-md py-2 text-sm font-medium transition-colors",
-                    collapsed ? "justify-center px-1" : "gap-3 px-2",
-                    groupedActive
-                      ? "bg-bordo-50 text-bordo-700"
-                      : "text-chumbo-700 hover:bg-chumbo-100/60",
-                  )}
-                >
-                  {groupedActive && (
-                    <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-sm bg-bordo-700" />
-                  )}
-                  {groupIcon}
-                  {!collapsed && (
-                    <>
-                      <span className="truncate">{groupLabel}</span>
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.8}
-                        strokeLinecap="round"
+          {multiGroup
+            ? groups?.map((g) => {
+                const items = accessibleItems.filter((it) => it.group === g.key);
+                if (items.length === 0) return null;
+                const active = items.some(itemAtivo);
+                const open = openGroups[g.key] ?? false;
+                return (
+                  <Fragment key={g.key}>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (collapsed) return;
+                          setOpenGroups((s) => ({ ...s, [g.key]: !s[g.key] }));
+                        }}
+                        title={collapsed ? g.label : undefined}
                         className={cn(
-                          "ml-auto h-3.5 w-3.5 flex-shrink-0 transition-transform duration-200",
-                          groupOpen && "rotate-180",
+                          "relative flex w-full items-center rounded-md py-2 text-sm font-medium transition-colors",
+                          collapsed ? "justify-center px-1" : "gap-3 px-2",
+                          active
+                            ? "bg-bordo-50 text-bordo-700"
+                            : "text-chumbo-700 hover:bg-chumbo-100/60",
                         )}
-                        aria-hidden
                       >
-                        <path d="M6 9l6 6 6-6" />
-                      </svg>
-                    </>
-                  )}
-                </button>
-              </li>
-              {(groupOpen || collapsed) &&
-                groupedItems.map((item) => (
-                  <NavRow
-                    key={item.href}
-                    item={item}
-                    activePath={activePath}
-                    collapsed={collapsed}
-                    nested
-                  />
-                ))}
-            </>
-          )}
+                        {active && (
+                          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-sm bg-bordo-700" />
+                        )}
+                        {g.icon ?? DEFAULT_GROUP_ICON}
+                        {!collapsed && (
+                          <>
+                            <span className="truncate">{g.label}</span>
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={1.8}
+                              strokeLinecap="round"
+                              className={cn(
+                                "ml-auto h-3.5 w-3.5 flex-shrink-0 transition-transform duration-200",
+                                open && "rotate-180",
+                              )}
+                              aria-hidden
+                            >
+                              <path d="M6 9l6 6 6-6" />
+                            </svg>
+                          </>
+                        )}
+                      </button>
+                    </li>
+                    {(open || collapsed) &&
+                      items.map((item) => (
+                        <NavRow
+                          key={item.href}
+                          item={item}
+                          activePath={activePath}
+                          collapsed={collapsed}
+                          nested
+                        />
+                      ))}
+                  </Fragment>
+                );
+              })
+            : hasGrouped && (
+                <>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (collapsed) return;
+                        setGroupOpen((o) => !o);
+                      }}
+                      title={collapsed ? groupLabel : undefined}
+                      className={cn(
+                        "relative flex w-full items-center rounded-md py-2 text-sm font-medium transition-colors",
+                        collapsed ? "justify-center px-1" : "gap-3 px-2",
+                        groupedActive
+                          ? "bg-bordo-50 text-bordo-700"
+                          : "text-chumbo-700 hover:bg-chumbo-100/60",
+                      )}
+                    >
+                      {groupedActive && (
+                        <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-sm bg-bordo-700" />
+                      )}
+                      {groupIcon}
+                      {!collapsed && (
+                        <>
+                          <span className="truncate">{groupLabel}</span>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.8}
+                            strokeLinecap="round"
+                            className={cn(
+                              "ml-auto h-3.5 w-3.5 flex-shrink-0 transition-transform duration-200",
+                              groupOpen && "rotate-180",
+                            )}
+                            aria-hidden
+                          >
+                            <path d="M6 9l6 6 6-6" />
+                          </svg>
+                        </>
+                      )}
+                    </button>
+                  </li>
+                  {(groupOpen || collapsed) &&
+                    groupedItems.map((item) => (
+                      <NavRow
+                        key={item.href}
+                        item={item}
+                        activePath={activePath}
+                        collapsed={collapsed}
+                        nested
+                      />
+                    ))}
+                </>
+              )}
         </ul>
       </nav>
 
