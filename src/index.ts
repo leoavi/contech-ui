@@ -19,6 +19,8 @@ export { PageHeader } from "./components/PageHeader";
 export { Section } from "./components/Section";
 export { Sidebar } from "./components/Sidebar";
 export type { NavItem, SidebarUsuario } from "./components/Sidebar";
+export { ThemeToggle } from "./components/ThemeToggle";
+export { themeInitScript, THEME_STORAGE_KEY } from "./lib/theme";
 
 // Lib
 export { cn } from "./lib/cn";
