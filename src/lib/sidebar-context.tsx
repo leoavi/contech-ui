@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 /**
  * Context global do estado collapsed/expandido da Sidebar.
@@ -22,12 +22,16 @@ const SidebarContext = createContext<SidebarCtx>({ collapsed: false, toggle: () 
 const STORAGE_KEY = "sidebar-collapsed";
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem(STORAGE_KEY) === "true";
-  });
+  // SEMPRE false no 1º render — o server não tem localStorage e renderiza
+  // expandido; se o inicializador lesse localStorage aqui, o 1º render do
+  // client divergiria do server → hydration mismatch (React #418). O estado
+  // salvo é aplicado logo após o mount, no useEffect abaixo.
+  const [collapsed, setCollapsed] = useState(false);
+  // Evita persistir no load inicial (antes do sync ler o valor salvo).
+  const hydrated = useRef(false);
 
   useEffect(() => {
+    if (!hydrated.current) return;
     localStorage.setItem(STORAGE_KEY, String(collapsed));
     document.documentElement.style.setProperty(
       "--sidebar-width",
@@ -35,9 +39,10 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     );
   }, [collapsed]);
 
-  // Sync inicial sem flash
+  // Sync após o mount — aplica o estado salvo sem causar mismatch.
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY) === "true";
+    hydrated.current = true;
     setCollapsed(saved);
     document.documentElement.style.setProperty(
       "--sidebar-width",
