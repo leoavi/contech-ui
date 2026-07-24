@@ -10,14 +10,27 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
  *
  * Padrão: cada app envolve seu root com <SidebarProvider> e usa
  * <Sidebar /> + <MainContent /> que automaticamente leem o context.
+ *
+ * Mobile (W1-C): `mobileOpen` controla o drawer off-canvas (<md).
+ * Não persiste — some no reload. Desktop (md+) ignora esse estado.
  */
 
 interface SidebarCtx {
   collapsed: boolean;
   toggle: () => void;
+  /** Drawer mobile aberto (<md). Default false. */
+  mobileOpen: boolean;
+  setMobileOpen: (open: boolean) => void;
+  toggleMobile: () => void;
 }
 
-const SidebarContext = createContext<SidebarCtx>({ collapsed: false, toggle: () => {} });
+const SidebarContext = createContext<SidebarCtx>({
+  collapsed: false,
+  toggle: () => {},
+  mobileOpen: false,
+  setMobileOpen: () => {},
+  toggleMobile: () => {},
+});
 
 const STORAGE_KEY = "sidebar-collapsed";
 
@@ -27,6 +40,8 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   // client divergiria do server → hydration mismatch (React #418). O estado
   // salvo é aplicado logo após o mount, no useEffect abaixo.
   const [collapsed, setCollapsed] = useState(false);
+  // Drawer mobile — não persiste; default false em server e 1º client render.
+  const [mobileOpen, setMobileOpen] = useState(false);
   // Evita persistir no load inicial (antes do sync ler o valor salvo).
   const hydrated = useRef(false);
 
@@ -50,9 +65,25 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  // Fecha o drawer mobile ao cruzar pra md+ (desktop não usa mobileOpen).
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onChange = () => {
+      if (mq.matches) setMobileOpen(false);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   return (
     <SidebarContext.Provider
-      value={{ collapsed, toggle: () => setCollapsed((v) => !v) }}
+      value={{
+        collapsed,
+        toggle: () => setCollapsed((v) => !v),
+        mobileOpen,
+        setMobileOpen,
+        toggleMobile: () => setMobileOpen((v) => !v),
+      }}
     >
       {children}
     </SidebarContext.Provider>
