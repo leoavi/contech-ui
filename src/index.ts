@@ -14,8 +14,15 @@ export { Button } from "./components/Button";
 export type { ButtonProps, ButtonSize, ButtonVariant } from "./components/Button";
 export { Card } from "./components/Card";
 export type { CardPadding, CardProps } from "./components/Card";
+export { ConfirmDialog } from "./components/ConfirmDialog";
+export type {
+  ConfirmDialogProps,
+  ConfirmDialogTone,
+} from "./components/ConfirmDialog";
 export { DataTable, tableFilters } from "./components/DataTable";
 export type { DataTableColumn } from "./components/DataTable";
+export { Dialog } from "./components/Dialog";
+export type { DialogProps, DialogSize } from "./components/Dialog";
 export { Field } from "./components/Field";
 export type { FieldControlProps, FieldProps } from "./components/Field";
 export { Input } from "./components/Input";
@@ -32,11 +39,23 @@ export type { NavItem, SidebarUsuario } from "./components/Sidebar";
 export { Textarea } from "./components/Textarea";
 export type { TextareaProps } from "./components/Textarea";
 export { ThemeToggle } from "./components/ThemeToggle";
+export { Toasts } from "./components/Toasts";
 export { themeInitScript, THEME_STORAGE_KEY } from "./lib/theme";
 
 // Lib
 export { cn } from "./lib/cn";
 export { SidebarProvider, useSidebar } from "./lib/sidebar-context";
+export {
+  ToastProvider,
+  useToast,
+  TOAST_DURATION_MS,
+} from "./lib/toast-context";
+export type {
+  ToastApi,
+  ToastHandle,
+  ToastItem,
+  ToastType,
+} from "./lib/toast-context";
 export {
   defaultIntervalo,
   formatBRL,
