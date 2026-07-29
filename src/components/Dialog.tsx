@@ -155,9 +155,11 @@ export function Dialog({
   // SSR-safe: só portaliza após mount no client; só renderiza quando open.
   if (!mounted || !open) return null;
 
+  // z-[200]: acima do ChatWidget (z-[100]) e GlobalSearch (z-50).
+  // Modal aberto "atrás" do chat = clique sem feedback (bug report 2026-07-29).
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
       data-contech-dialog
     >
       {/* Backdrop — token preto com opacidade (não hex cru). */}
