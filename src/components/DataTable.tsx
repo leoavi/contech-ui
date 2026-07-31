@@ -6,9 +6,17 @@
  * Padroniza (decisão arquitetural 18/05/2026 com Leonardo):
  *   - Sort por click no header (asc → desc → null), indicador ↑↓
  *   - Filtro por coluna via ícone de funil → popover (text | select | numberRange)
- *   - Altura limitada a ~10 linhas com header sticky + scrollbar
- *   - Counter no rodapé "X de Y registros (Z filtrados)"
+ *   - Paginação clássica (pageSize default 10); counter no rodapé
+ *   - Overflow horizontal no wrapper interno (overflow-x-auto + min-w na table)
+ *     para colunas largas em viewport estreita — página NÃO ganha scroll lateral
+ *   - Filtro de coluna via portal (fora do contexto de recorte do scroll)
  *   - Linha expansível inline (drill-down) opcional
+ *
+ * Sticky header: o comentário histórico ("header sticky") referia a era
+ * maxVisibleRows/altura fixa. Com paginação não há scroll vertical interno;
+ * `thead` não usa position:sticky. Um ancestral overflow-x-auto também
+ * recria scroll containment — se sticky voltar no futuro, testar com o
+ * container de scroll vertical no mesmo elemento do overflow-x.
  *
  * NÃO se aplica a: pivots (DRE, frota faturamento, armazem ocupacao),
  * heatmaps e grids declarativos (arquitetura).
@@ -30,7 +38,16 @@ import {
 	type SortingState,
 	useReactTable,
 } from "@tanstack/react-table";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { createPortal } from "react-dom";
 import { cn } from "../lib/cn";
 import { montarCsv } from "../lib/csv";
 
@@ -168,9 +185,12 @@ export function DataTable<T>({
 	}
 
 	return (
-		<div className="overflow-hidden rounded-lg border border-chumbo-100 bg-bege">
-			<div className="relative">
-				<table className="w-full text-sm">
+		// Outer: borda + radius (sem overflow — evita cortar cantos no eixo de scroll).
+		// Inner: overflow-x-auto isola a rolagem horizontal; a página não rola de lado.
+		// table: min-w-full (preenche quando há poucas colunas) + w-max (estoura quando não cabe).
+		<div className="rounded-lg border border-chumbo-100 bg-bege">
+			<div className="overflow-x-auto">
+				<table className="w-max min-w-full text-sm">
 					<thead className="bg-bege/95">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<tr
@@ -187,7 +207,7 @@ export function DataTable<T>({
 										<th
 											key={header.id}
 											className={cn(
-												"px-4 py-3 font-semibold",
+												"whitespace-nowrap px-4 py-3 font-semibold",
 												align === "right" && "text-right",
 												align === "center" && "text-center",
 												align === "left" && "text-left",
@@ -525,6 +545,16 @@ function SortIndicator({ dir }: { dir: false | "asc" | "desc" }) {
 	);
 }
 
+const FILTER_POPOVER_GAP = 4;
+const FILTER_POPOVER_VIEWPORT_PAD = 8;
+const FILTER_POPOVER_MIN_WIDTH = 200;
+
+/**
+ * Popover de filtro ancorado no botão via portal em document.body.
+ * Sai do contexto de recorte de qualquer ancestral overflow (ex.: overflow-x-auto).
+ * Posiciona com getBoundingClientRect + colisão com a viewport; fecha com
+ * clique-fora e Escape; reposiciona em scroll (capture) e resize.
+ */
 function FilterPopover<T>({
 	column,
 	type,
@@ -537,7 +567,13 @@ function FilterPopover<T>({
 	popoverAlign?: "left" | "right";
 }) {
 	const [open, setOpen] = useState(false);
-	const ref = useRef<HTMLDivElement>(null);
+	const [mounted, setMounted] = useState(false);
+	const [coords, setCoords] = useState<{ top: number; left: number }>({
+		top: 0,
+		left: 0,
+	});
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	const panelRef = useRef<HTMLDivElement>(null);
 	const filterValue = column.getFilterValue();
 	const hasFilter =
 		filterValue != null &&
@@ -547,7 +583,6 @@ function FilterPopover<T>({
 			filterValue.every((v) => v == null || v === "")
 		);
 
-	// Para select: extrai valores únicos da coluna
 	const uniqueValues = useMemo(() => {
 		if (type !== "select") return [];
 		const vals = new Set<string>();
@@ -560,37 +595,114 @@ function FilterPopover<T>({
 		return [...vals].sort();
 	}, [data, column, type]);
 
-	return (
-		<div className="relative" ref={ref}>
-			<button
-				type="button"
-				onClick={(e) => {
-					e.stopPropagation();
-					setOpen(!open);
-				}}
-				className={cn(
-					"rounded p-1 transition-colors hover:bg-chumbo-100",
-					hasFilter && "text-bordo-700",
-					!hasFilter && "text-chumbo-500",
-				)}
-				title="Filtrar coluna"
-			>
-				<FunnelIcon active={hasFilter} />
-			</button>
-			{open && (
-				<>
-					<button
-						type="button"
-						className="fixed inset-0 z-20 cursor-default"
-						onClick={() => setOpen(false)}
-						aria-label="Fechar filtro"
-					/>
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	const close = useCallback(() => {
+		setOpen(false);
+		// Devolve o foco ao gatilho para teclado/leitor de tela.
+		buttonRef.current?.focus();
+	}, []);
+
+	const updatePosition = useCallback(() => {
+		const btn = buttonRef.current;
+		if (!btn) return;
+		const rect = btn.getBoundingClientRect();
+		const panel = panelRef.current;
+		const panelWidth = panel?.offsetWidth ?? FILTER_POPOVER_MIN_WIDTH;
+		const panelHeight = panel?.offsetHeight ?? 0;
+		const vw = window.innerWidth;
+		const vh = window.innerHeight;
+		const pad = FILTER_POPOVER_VIEWPORT_PAD;
+
+		// Preferência: abaixo do botão; alinhamento left/right conforme a coluna.
+		let top = rect.bottom + FILTER_POPOVER_GAP;
+		let left =
+			popoverAlign === "right" ? rect.right - panelWidth : rect.left;
+
+		// Colisão horizontal com a viewport.
+		if (left + panelWidth > vw - pad) left = vw - panelWidth - pad;
+		if (left < pad) left = pad;
+
+		// Colisão vertical: vira para cima se não couber embaixo.
+		if (panelHeight > 0 && top + panelHeight > vh - pad) {
+			const above = rect.top - panelHeight - FILTER_POPOVER_GAP;
+			if (above >= pad) top = above;
+			else top = Math.max(pad, vh - panelHeight - pad);
+		}
+		if (top < pad) top = pad;
+
+		setCoords({ top, left });
+	}, [popoverAlign]);
+
+	// Posiciona no open e após medir o painel; escuta scroll (capture) + resize.
+	useLayoutEffect(() => {
+		if (!open) return;
+		updatePosition();
+		// 2º frame: painel já com tamanho real (conteúdo montado).
+		const raf = requestAnimationFrame(() => updatePosition());
+
+		const onScrollOrResize = () => updatePosition();
+		window.addEventListener("scroll", onScrollOrResize, true);
+		window.addEventListener("resize", onScrollOrResize);
+		return () => {
+			cancelAnimationFrame(raf);
+			window.removeEventListener("scroll", onScrollOrResize, true);
+			window.removeEventListener("resize", onScrollOrResize);
+		};
+	}, [open, updatePosition, type, hasFilter]);
+
+	// Clique-fora + Escape.
+	useEffect(() => {
+		if (!open) return;
+		const onKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				e.stopPropagation();
+				close();
+			}
+		};
+		const onPointerDown = (e: MouseEvent) => {
+			const target = e.target as Node;
+			if (panelRef.current?.contains(target)) return;
+			if (buttonRef.current?.contains(target)) return;
+			close();
+		};
+		document.addEventListener("keydown", onKeyDown);
+		document.addEventListener("mousedown", onPointerDown);
+		return () => {
+			document.removeEventListener("keydown", onKeyDown);
+			document.removeEventListener("mousedown", onPointerDown);
+		};
+	}, [open, close]);
+
+	// Foco no primeiro campo ao abrir.
+	useEffect(() => {
+		if (!open) return;
+		const raf = requestAnimationFrame(() => {
+			const el = panelRef.current?.querySelector<HTMLElement>(
+				"input, select, button",
+			);
+			el?.focus();
+		});
+		return () => cancelAnimationFrame(raf);
+	}, [open, type]);
+
+	const panel =
+		open && mounted
+			? createPortal(
 					<div
-						className={cn(
-							"absolute top-7 z-30 min-w-[200px] rounded-md border border-chumbo-100 bg-bege p-2 shadow-xl",
-							popoverAlign === "right" ? "right-0" : "left-0",
-						)}
-						style={{ colorScheme: "dark" }}
+						ref={panelRef}
+						role="dialog"
+						aria-label="Filtrar coluna"
+						className="fixed z-50 min-w-[200px] rounded-md border border-chumbo-100 bg-bege p-2 shadow-xl"
+						style={{
+							top: coords.top,
+							left: coords.left,
+							colorScheme: "dark",
+						}}
+						onClick={(e) => e.stopPropagation()}
 					>
 						{type === "text" && (
 							<input
@@ -600,9 +712,7 @@ function FilterPopover<T>({
 								onChange={(e) =>
 									column.setFilterValue(e.target.value || undefined)
 								}
-								onClick={(e) => e.stopPropagation()}
 								className="w-full rounded border border-chumbo-100 bg-offwhite px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
-								autoFocus
 							/>
 						)}
 						{type === "select" && (
@@ -611,10 +721,8 @@ function FilterPopover<T>({
 								onChange={(e) =>
 									column.setFilterValue(e.target.value || undefined)
 								}
-								onClick={(e) => e.stopPropagation()}
 								className="w-full rounded border border-chumbo-100 bg-offwhite px-2 py-1 text-xs text-chumbo-950 focus:border-bordo-700 focus:outline-none"
 								style={{ colorScheme: "dark" }}
-								autoFocus
 							>
 								<option value="">Todos</option>
 								{uniqueValues.map((v) => (
@@ -641,7 +749,6 @@ function FilterPopover<T>({
 										];
 										column.setFilterValue([min, current[1]]);
 									}}
-									onClick={(e) => e.stopPropagation()}
 									className="w-full rounded border border-chumbo-100 bg-bege px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
 								/>
 								<input
@@ -659,7 +766,6 @@ function FilterPopover<T>({
 										];
 										column.setFilterValue([current[0], max]);
 									}}
-									onClick={(e) => e.stopPropagation()}
 									className="w-full rounded border border-chumbo-100 bg-bege px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
 								/>
 							</div>
@@ -670,17 +776,40 @@ function FilterPopover<T>({
 								onClick={(e) => {
 									e.stopPropagation();
 									column.setFilterValue(undefined);
-									setOpen(false);
+									close();
 								}}
 								className="mt-2 w-full rounded bg-chumbo-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-chumbo-700 hover:bg-chumbo-100/70"
 							>
 								Limpar filtro
 							</button>
 						)}
-					</div>
-				</>
-			)}
-		</div>
+					</div>,
+					document.body,
+				)
+			: null;
+
+	return (
+		<>
+			<button
+				ref={buttonRef}
+				type="button"
+				aria-haspopup="dialog"
+				aria-expanded={open}
+				onClick={(e) => {
+					e.stopPropagation();
+					setOpen((v) => !v);
+				}}
+				className={cn(
+					"rounded p-1 transition-colors hover:bg-chumbo-100",
+					hasFilter && "text-bordo-700",
+					!hasFilter && "text-chumbo-500",
+				)}
+				title="Filtrar coluna"
+			>
+				<FunnelIcon active={hasFilter} />
+			</button>
+			{panel}
+		</>
 	);
 }
 

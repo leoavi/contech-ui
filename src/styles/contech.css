@@ -51,6 +51,12 @@
   --color-warning: #e09347;
   --color-neutral: #7a8290;
 
+  /* Texto sobre superfície bordô — SEMPRE claro (#f0f2f5) nos dois temas.
+     Não usa chumbo-950 nem white: ambos invertem com o tema e quebram o
+     contraste em `bg-bordo-700` no light (texto escuro sobre bordô ≈ 1,59:1).
+     Utilitário: text-on-bordo. */
+  --color-on-bordo: #f0f2f5;
+
   /* Categóricas (gráficos) */
   --color-cat-1: #b8324a;
   --color-cat-2: #4a7bb8;
@@ -132,6 +138,9 @@ html[data-theme="light"] {
   --color-cat-6: #c4405b;
   --color-cat-7: #7a8590;
   --color-cat-8: #9b2336;
+
+  /* Mesmo valor do dark — on-bordo NÃO acompanha a escala invertida. */
+  --color-on-bordo: #f0f2f5;
 }
 
 .tabular,
