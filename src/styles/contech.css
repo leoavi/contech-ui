@@ -89,18 +89,31 @@ body {
    (bg-white, text-chumbo-950, etc.) seguem a cascata sem mudar markup.
    Mesma paleta usada no @media print do app.
    ======================================================================== */
-html[data-theme="light"] {
+/* ⚠️ O seletor precisa incluir o BODY: o base declara `html,body{color-scheme:dark}`,
+   e valor DECLARADO no body vence o herdado do html. Sem isto, scrollbars, <select>,
+   checkbox e todo widget nativo continuam renderizando como TEMA ESCURO dentro da UI
+   clara (visto em produção no app desktop: scrollbar escura + selects deslavados). */
+html[data-theme="light"],
+html[data-theme="light"] body {
   color-scheme: light;
+}
 
-  /* Chumbo "des-invertido": 950 = texto escuro, 100 = borda clara. */
+html[data-theme="light"] {
+  /* Chumbo "des-invertido": 950 = texto escuro, 100 = borda clara.
+     Rampa 300-500 mais ESCURA que o espelho do dark de propósito (calibrada com
+     revisão de 2 especialistas, 2026-07-31): texto claro sobre fundo escuro ganha
+     percepção (irradiação); cinza médio sobre branco perde. A mesma classe precisa
+     de mais tinta no light — 500 é o texto secundário padrão (7.0:1), 400 metadata
+     (5.5:1), 300 placeholder/disabled (3.5:1). 500 NÃO pode colar no 600 (o degrau
+     da hierarquia morre) — por isso 500 assume o antigo 600 e o resto desce junto. */
   --color-chumbo-950: #1b2028;
   --color-chumbo-900: #242b35;
   --color-chumbo-800: #2d353f;
   --color-chumbo-700: #3d4852;
-  --color-chumbo-600: #4d5862;
-  --color-chumbo-500: #5a6673;
-  --color-chumbo-400: #7a8590;
-  --color-chumbo-300: #9aa3ad;
+  --color-chumbo-600: #46515c;
+  --color-chumbo-500: #4d5862;
+  --color-chumbo-400: #5a6673;
+  --color-chumbo-300: #7a8590;
   --color-chumbo-200: #c8ccd2;
   --color-chumbo-100: #e8eaed;
   --color-chumbo-50: #f0ece9;
@@ -127,16 +140,16 @@ html[data-theme="light"] {
   --color-positive: #287b50;
   --color-negative: #c4405b;
   --color-warning: #b8721f;
-  --color-neutral: #5a6673;
+  --color-neutral: #4d5862;
 
   /* Categóricas (gráficos) — versões saturadas p/ fundo claro. */
   --color-cat-1: #7b1c2e;
   --color-cat-2: #1a3a6a;
   --color-cat-3: #287b50;
   --color-cat-4: #b8721f;
-  --color-cat-5: #5a6673;
+  --color-cat-5: #4d5862;
   --color-cat-6: #c4405b;
-  --color-cat-7: #7a8590;
+  --color-cat-7: #5a6673;
   --color-cat-8: #9b2336;
 
   /* Mesmo valor do dark — on-bordo NÃO acompanha a escala invertida. */
