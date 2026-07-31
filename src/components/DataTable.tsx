@@ -188,10 +188,10 @@ export function DataTable<T>({
 		// Outer: borda + radius (sem overflow — evita cortar cantos no eixo de scroll).
 		// Inner: overflow-x-auto isola a rolagem horizontal; a página não rola de lado.
 		// table: min-w-full (preenche quando há poucas colunas) + w-max (estoura quando não cabe).
-		<div className="rounded-lg border border-chumbo-100 bg-bege">
+		<div className="rounded-lg border border-chumbo-100 bg-white">
 			<div className="overflow-x-auto">
 				<table className="w-max min-w-full text-sm">
-					<thead className="bg-bege/95">
+					<thead className="bg-white/95">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<tr
 								key={headerGroup.id}
@@ -283,7 +283,7 @@ export function DataTable<T>({
 					</tbody>
 				</table>
 			</div>
-			<div className="flex flex-wrap items-center justify-between gap-3 border-t border-chumbo-100/40 bg-bege/30 px-4 py-2 text-[11px] text-chumbo-500">
+			<div className="flex flex-wrap items-center justify-between gap-3 border-t border-chumbo-100/40 bg-white/30 px-4 py-2 text-[11px] text-chumbo-500">
 				<div className="flex flex-wrap items-center gap-3">
 					<div>
 						{totalFiltrados === totalRegistros ? (
@@ -499,8 +499,8 @@ function RenderRow<T>({
 				onClick={clickable ? onToggleExpand : undefined}
 				className={cn(
 					"border-b border-chumbo-100/40 transition-colors",
-					clickable && "cursor-pointer hover:bg-bege/30",
-					isExpanded && "bg-bege/40",
+					clickable && "cursor-pointer hover:bg-white/30",
+					isExpanded && "bg-white/40",
 				)}
 			>
 				{row.getVisibleCells().map((cell) => {
@@ -524,7 +524,7 @@ function RenderRow<T>({
 				<tr>
 					<td
 						colSpan={row.getVisibleCells().length}
-						className="bg-bege/20 px-4 py-4"
+						className="bg-white/20 px-4 py-4"
 					>
 						{expandable(row.original)}
 					</td>
@@ -696,7 +696,7 @@ function FilterPopover<T>({
 						ref={panelRef}
 						role="dialog"
 						aria-label="Filtrar coluna"
-						className="fixed z-50 min-w-[200px] rounded-md border border-chumbo-100 bg-bege p-2 shadow-xl"
+						className="fixed z-50 min-w-[200px] rounded-md border border-chumbo-100 bg-white p-2 shadow-xl"
 						style={{
 							top: coords.top,
 							left: coords.left,
@@ -749,7 +749,7 @@ function FilterPopover<T>({
 										];
 										column.setFilterValue([min, current[1]]);
 									}}
-									className="w-full rounded border border-chumbo-100 bg-bege px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
+									className="w-full rounded border border-chumbo-100 bg-white px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
 								/>
 								<input
 									type="number"
@@ -766,7 +766,7 @@ function FilterPopover<T>({
 										];
 										column.setFilterValue([current[0], max]);
 									}}
-									className="w-full rounded border border-chumbo-100 bg-bege px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
+									className="w-full rounded border border-chumbo-100 bg-white px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
 								/>
 							</div>
 						)}
