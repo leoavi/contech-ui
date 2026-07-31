@@ -712,7 +712,7 @@ function FilterPopover<T>({
 								onChange={(e) =>
 									column.setFilterValue(e.target.value || undefined)
 								}
-								className="w-full rounded border border-chumbo-100 bg-offwhite px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
+								className="w-full rounded border border-chumbo-100 bg-offwhite px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none"
 							/>
 						)}
 						{type === "select" && (
@@ -749,7 +749,7 @@ function FilterPopover<T>({
 										];
 										column.setFilterValue([min, current[1]]);
 									}}
-									className="w-full rounded border border-chumbo-100 bg-white px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
+									className="w-full rounded border border-chumbo-100 bg-white px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none"
 								/>
 								<input
 									type="number"
@@ -766,7 +766,7 @@ function FilterPopover<T>({
 										];
 										column.setFilterValue([current[0], max]);
 									}}
-									className="w-full rounded border border-chumbo-100 bg-white px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none"
+									className="w-full rounded border border-chumbo-100 bg-white px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none"
 								/>
 							</div>
 						)}

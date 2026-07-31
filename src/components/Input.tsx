@@ -7,7 +7,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const baseClasses =
-  "w-full rounded-lg border border-chumbo-100 bg-white px-3 py-2 text-sm text-chumbo-950 placeholder:text-chumbo-500 focus:border-bordo-700 focus:outline-none focus:ring-1 focus:ring-bordo-700/20 disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full rounded-lg border border-chumbo-100 bg-white px-3 py-2 text-sm text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none focus:ring-1 focus:ring-bordo-700/20 disabled:cursor-not-allowed disabled:opacity-60";
 
 const invalidClasses =
   "border-negative focus:border-negative focus:ring-negative/20";

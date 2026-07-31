@@ -100,19 +100,19 @@ html[data-theme="light"] body {
 
 html[data-theme="light"] {
   /* Chumbo "des-invertido": 950 = texto escuro, 100 = borda clara.
-     Rampa 300-500 mais ESCURA que o espelho do dark de propósito (calibrada com
-     revisão de 2 especialistas, 2026-07-31): texto claro sobre fundo escuro ganha
-     percepção (irradiação); cinza médio sobre branco perde. A mesma classe precisa
-     de mais tinta no light — 500 é o texto secundário padrão (7.0:1), 400 metadata
-     (5.5:1), 300 placeholder/disabled (3.5:1). 500 NÃO pode colar no 600 (o degrau
-     da hierarquia morre) — por isso 500 assume o antigo 600 e o resto desce junto. */
+     COLAPSO SEMÂNTICO do secundário no light (2026-07-31, 3ª rejeição do dono +
+     2 especialistas): 500=600=700=#3d4852 (~9,3:1 sobre branco). No claro a
+     hierarquia real passa a ser 2 níveis honestos — primário (#1b2028) vs
+     secundário (#3d4852) — mais peso/tamanho; 400 metadata (#4d5862); 300
+     placeholder/disabled (#7a8590, intacto). Degraus 500≠600 morreram de
+     propósito: o dono pede "mais escuro no branco" sem admitir 2 níveis. */
   --color-chumbo-950: #1b2028;
   --color-chumbo-900: #242b35;
   --color-chumbo-800: #2d353f;
   --color-chumbo-700: #3d4852;
-  --color-chumbo-600: #46515c;
-  --color-chumbo-500: #4d5862;
-  --color-chumbo-400: #5a6673;
+  --color-chumbo-600: #3d4852;
+  --color-chumbo-500: #3d4852;
+  --color-chumbo-400: #4d5862;
   --color-chumbo-300: #7a8590;
   --color-chumbo-200: #c8ccd2;
   --color-chumbo-100: #e8eaed;
