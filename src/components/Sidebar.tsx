@@ -21,8 +21,8 @@ import { Logo } from "./Logo";
  * Comportamento:
  * - Collapse via useSidebar() (persistido em localStorage) — md+
  * - Mobile (<md): drawer off-canvas + hamburger; md+ pixel-idêntico ao legado
- * - Item ativo: `bg-bordo-50 text-bordo-700` + barra lateral 3px
- * - Hover: `bg-chumbo-100/60`
+ * - Item ativo: preenchimento `bg-bordo-700 text-on-bordo` (tinta estrutural)
+ * - Hover inativo: `bg-nav-hover` sobre superfície `bg-nav`
  * - Items com `group` viram accordion (default: "Agents", configurável)
  * - Items com `disabled: true` mostram label "em breve" sem link
  * - Footer com avatar (iniciais), nome, login e botão logout
@@ -286,7 +286,7 @@ export function Sidebar({
         tabIndex={mobileOpen ? -1 : undefined}
         className={cn(
           // Base compartilhada + apresentação desktop legada gateada em md:
-          "no-print fixed inset-y-0 left-0 flex flex-col border-r border-chumbo-100 bg-white",
+          "no-print fixed inset-y-0 left-0 flex flex-col border-r border-chumbo-100 bg-nav",
           "transition-[width,transform] duration-200 ease-in-out",
           // Mobile: drawer off-canvas w-72, z alto
           "z-50 w-72",
@@ -313,7 +313,7 @@ export function Sidebar({
             onClick={toggle}
             title={collapsed ? "Expandir menu" : "Minimizar menu"}
             className={cn(
-              "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-chumbo-500 transition-colors hover:bg-chumbo-100/60 hover:text-chumbo-950",
+              "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-chumbo-950",
               collapsed && "mx-auto",
             )}
           >
@@ -356,8 +356,8 @@ export function Sidebar({
                             // Grupo ativo recebe só realce sutil (negrito escuro);
                             // o vermelho forte fica reservado ao item-folha ativo.
                             active
-                              ? "font-semibold text-chumbo-950 hover:bg-chumbo-100/60"
-                              : "text-chumbo-700 hover:bg-chumbo-100/60",
+                              ? "font-semibold text-chumbo-950 hover:bg-nav-hover"
+                              : "text-chumbo-700 hover:bg-nav-hover",
                           )}
                         >
                           {g.icon ?? DEFAULT_GROUP_ICON}
@@ -410,13 +410,10 @@ export function Sidebar({
                           "relative flex w-full items-center rounded-md py-2 text-sm font-medium transition-colors",
                           collapsed ? "justify-center px-1" : "gap-3 px-2",
                           groupedActive
-                            ? "bg-bordo-50 text-bordo-700"
-                            : "text-chumbo-700 hover:bg-chumbo-100/60",
+                            ? "font-semibold text-chumbo-950 hover:bg-nav-hover"
+                            : "text-chumbo-700 hover:bg-nav-hover",
                         )}
                       >
-                        {groupedActive && (
-                          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-sm bg-bordo-700" />
-                        )}
                         {groupIcon}
                         {!collapsed && (
                           <>
@@ -469,7 +466,7 @@ export function Sidebar({
               type="button"
               onClick={handleLogout}
               title="Sair"
-              className="mx-auto flex h-8 w-8 items-center justify-center rounded-md text-chumbo-500 transition-colors hover:bg-chumbo-100/60 hover:text-negative"
+              className="mx-auto flex h-8 w-8 items-center justify-center rounded-md text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-negative"
             >
               <LogoutIcon />
             </button>
@@ -490,7 +487,7 @@ export function Sidebar({
                 type="button"
                 onClick={handleLogout}
                 title="Sair"
-                className="flex-shrink-0 rounded-md p-1.5 text-chumbo-500 transition-colors hover:bg-chumbo-100/60 hover:text-negative"
+                className="flex-shrink-0 rounded-md p-1.5 text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-negative"
               >
                 <LogoutIcon small />
               </button>
@@ -520,7 +517,7 @@ function NavRow({
   const isActive =
     activePath === item.href || (item.href !== "/" && activePath.startsWith(item.href));
   const base = cn(
-    "relative flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+    "relative flex h-9 items-center rounded-lg text-sm font-medium transition-colors",
     collapsed ? "justify-center px-1" : nested ? "gap-3 px-2 pl-7" : "gap-3 px-2",
   );
 
@@ -554,16 +551,13 @@ function NavRow({
         className={cn(
           base,
           isActive
-            ? "bg-bordo-50 text-bordo-700"
-            : nested
-              ? "text-chumbo-700 hover:bg-chumbo-100/60"
-              : "text-chumbo-700 hover:bg-chumbo-100/60",
+            ? "bg-bordo-700 text-on-bordo hover:bg-bordo-600"
+            : "text-chumbo-700 hover:bg-nav-hover",
         )}
       >
-        {isActive && (
-          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-sm bg-bordo-700" />
-        )}
-        {item.icon}
+        <span className={cn("flex-shrink-0", isActive && "text-on-bordo")}>
+          {item.icon}
+        </span>
         {!collapsed && <span className="truncate">{item.label}</span>}
       </Link>
     </li>

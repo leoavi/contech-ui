@@ -38,6 +38,11 @@
   /* Override do white → surface card */
   --color-white: #242b35;
 
+  /* Navegação lateral — superfície própria (mais fundo que canvas #161b22). */
+  --color-nav: #12161c;
+  --color-aside: #1b212a; /* aside/inset do chat: acima do canvas, abaixo da leitura */
+  --color-nav-hover: #1b212a;
+
   /* Suporte */
   --color-azul: #4a7bb8;
   --color-verde: #4ba87a;
@@ -143,6 +148,11 @@ html[data-theme="light"] {
   --color-white: #fffcfa; /* superfície de trabalho quente (não branco puro) */
   --color-offwhite: #e9e2dd; /* canvas porcelana */
   --color-bege: #f3ece8;
+
+  /* Navegação lateral — porcelana rosada. */
+  --color-nav: #e2d6d3;
+  --color-aside: #f3ece8; /* inset quente (Sol: sidebars de conversas/artefatos) */
+  --color-nav-hover: #d8c9c6;
 
   /* Suporte/semânticos do brand light (mais escuros p/ contraste em claro). */
   --color-azul: #1a3a6a;
