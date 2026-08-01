@@ -126,8 +126,8 @@ html[data-theme="light"] {
   --color-chumbo-400: #4d5862;
   --color-chumbo-300: #7a8590;
   --color-chumbo-200: #c8ccd2;
-  --color-chumbo-100: #d8cdc8; /* borda sutil quente (parecer Sol max, porcelana-com-tinta) */
-  --color-chumbo-50: #f3ece8;  /* inset/hover quente */
+  --color-chumbo-100: #dcc9c4; /* borda rosada sutil */
+  --color-chumbo-50: #f4e9e6;  /* inset/hover rosado */
 
   /* Bordô para fundo claro — 700 é a primária do brand (#7b1c2e). */
   --color-bordo-950: #2a0d14;
@@ -146,12 +146,12 @@ html[data-theme="light"] {
      Agora: canvas cinza-azulado REAL (offwhite) › cartão branco › inset (chumbo-50/bege).
      Valores calibrados ao vivo contra a home e o chat em produção (protótipo injetado). */
   --color-white: #fffcfa; /* superfície de trabalho quente (não branco puro) */
-  --color-offwhite: #e9e2dd; /* canvas porcelana */
-  --color-bege: #f3ece8;
+  --color-offwhite: #ebdfdb; /* canvas rose-porcelana (aprovado pelo dono, 2026-08-01) */
+  --color-bege: #f4e9e6;
 
   /* Navegação lateral — porcelana rosada. */
   --color-nav: #e2d6d3;
-  --color-aside: #f3ece8; /* inset quente (Sol: sidebars de conversas/artefatos) */
+  --color-aside: #f0e2de; /* inset rosado dos asides do chat */
   --color-nav-hover: #d8c9c6;
 
   /* Suporte/semânticos do brand light (mais escuros p/ contraste em claro). */
