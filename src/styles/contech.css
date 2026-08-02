@@ -181,3 +181,11 @@ html[data-theme="light"] {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }
+
+/* Foco de teclado VISÍVEL nos dois temas (parecer Sol 2026-08-02): anel bordô.
+   Só :focus-visible — clique/toque não ganha anel; Tab sim. Fica no pacote pra
+   valer em Gestão e BI. */
+:focus-visible {
+  outline: 2px solid var(--color-bordo-600);
+  outline-offset: 1px;
+}

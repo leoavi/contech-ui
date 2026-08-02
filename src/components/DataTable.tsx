@@ -498,9 +498,11 @@ function RenderRow<T>({
 			<tr
 				onClick={clickable ? onToggleExpand : undefined}
 				className={cn(
-					"border-b border-chumbo-100/40 transition-colors",
+					// dt-row/dt-row-ativa: ganchos pros apps estilizarem hover/seleção por tema
+					// (ex.: Gestão light usa bordo-50 + marcador; ver globals.css do app).
+					"dt-row border-b border-chumbo-100/40 transition-colors",
 					clickable && "cursor-pointer hover:bg-white/30",
-					isExpanded && "bg-white/40",
+					isExpanded && "dt-row-ativa bg-white/40",
 				)}
 			>
 				{row.getVisibleCells().map((cell) => {
