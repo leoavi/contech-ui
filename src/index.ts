@@ -64,7 +64,16 @@ export {
 	formatPercentValue,
 } from "./lib/format";
 export { SidebarProvider, useSidebar } from "./lib/sidebar-context";
-export { THEME_STORAGE_KEY, themeInitScript } from "./lib/theme";
+export {
+	THEME_COOKIE_NAME,
+	THEME_STORAGE_KEY,
+	parseTheme,
+	readThemeCookie,
+	themeHtmlAttribute,
+	themeInitScript,
+} from "./lib/theme";
+export type { Theme } from "./lib/theme";
+export { applyTheme } from "./components/ThemeToggle";
 export type {
 	ToastApi,
 	ToastHandle,
