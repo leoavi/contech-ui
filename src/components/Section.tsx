@@ -13,7 +13,7 @@ export function Section({ title, description, action, children, className }: Sec
   return (
     <section className={cn("flex flex-col gap-4", className)}>
       {(title || action) && (
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex min-w-0 flex-col items-stretch gap-3 md:flex-row md:items-end md:justify-between md:gap-4">
           <div className="flex items-start gap-2">
             {title && (
               <div

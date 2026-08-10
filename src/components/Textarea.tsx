@@ -7,7 +7,7 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
 }
 
 const baseClasses =
-  "w-full rounded-lg border border-chumbo-100 bg-white px-3 py-2 text-sm text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none focus:ring-1 focus:ring-bordo-700/20 disabled:cursor-not-allowed disabled:opacity-60";
+  "min-w-0 max-w-full w-full rounded-lg border border-chumbo-100 bg-white px-3 py-2 text-base text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none focus:ring-1 focus:ring-bordo-700/20 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm";
 
 const invalidClasses =
   "border-negative focus:border-negative focus:ring-negative/20";
