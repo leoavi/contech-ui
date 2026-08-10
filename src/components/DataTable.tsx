@@ -229,7 +229,7 @@ export function DataTable<T>({
 													}
 													disabled={!canSort}
 													className={cn(
-														"inline-flex items-center gap-1 transition-colors",
+														"inline-flex min-h-11 items-center gap-1 transition-colors md:min-h-0",
 														canSort && "cursor-pointer hover:text-chumbo-950",
 														!canSort && "cursor-default",
 													)}
@@ -802,7 +802,7 @@ function FilterPopover<T>({
 					setOpen((v) => !v);
 				}}
 				className={cn(
-					"rounded p-1 transition-colors hover:bg-chumbo-100",
+					"min-h-11 min-w-11 rounded p-1 transition-colors hover:bg-chumbo-100 md:min-h-0 md:min-w-0",
 					hasFilter && "text-bordo-700",
 					!hasFilter && "text-chumbo-500",
 				)}

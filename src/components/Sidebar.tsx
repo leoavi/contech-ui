@@ -170,6 +170,13 @@ export function Sidebar({
   });
 
   const closeMobile = useCallback(() => setMobileOpen(false), [setMobileOpen]);
+  const collapsedForRender = collapsed;
+  const closeOrToggle = mobileOpen ? closeMobile : toggle;
+  const toggleLabel = mobileOpen
+    ? "Fechar menu"
+    : collapsed
+      ? "Expandir menu"
+      : "Minimizar menu";
 
   // Focus trap + Esc + scroll-lock + retorno de foco — só no drawer mobile aberto.
   useEffect(() => {
@@ -255,11 +262,11 @@ export function Sidebar({
       <button
         type="button"
         onClick={toggleMobile}
-        aria-label="Abrir menu"
+        aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
         aria-expanded={mobileOpen}
         aria-controls={drawerId}
         className={cn(
-          "no-print fixed left-3 top-3 z-30 flex h-10 w-10 items-center justify-center",
+          "no-print fixed left-3 top-3 z-30 flex h-11 w-11 items-center justify-center",
           "rounded-md border border-chumbo-100 bg-white text-chumbo-700 shadow-sm",
           "transition-colors hover:bg-chumbo-100/60 hover:text-chumbo-950",
           "md:hidden",
@@ -271,7 +278,7 @@ export function Sidebar({
       {/* Backdrop — só mobile + só quando drawer aberto. */}
       {mobileOpen ? (
         <div
-          className="no-print fixed inset-0 z-40 bg-preto/60 md:hidden"
+          className="no-print fixed inset-0 z-50 bg-preto/60 md:hidden"
           aria-hidden
           onClick={closeMobile}
         />
@@ -289,7 +296,7 @@ export function Sidebar({
           "no-print fixed inset-y-0 left-0 flex flex-col border-r border-chumbo-100 bg-nav",
           "transition-[width,transform] duration-200 ease-in-out",
           // Mobile: drawer off-canvas w-72, z alto
-          "z-50 w-72",
+          "z-[60] w-72",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           // Desktop (md+): EXATAMENTE o aside de sempre — fixo, z-10, w-10|w-60, sempre visível
           "md:z-10 md:translate-x-0",
@@ -300,36 +307,37 @@ export function Sidebar({
         <div
           className={cn(
             "flex h-16 items-center justify-between",
-            collapsed ? "px-1" : "px-3",
+            collapsedForRender ? "px-1" : "px-3",
           )}
         >
-          {!collapsed && (
+          {!collapsedForRender && (
             <div className="overflow-hidden">
               <Logo size="md" />
             </div>
           )}
           <button
             type="button"
-            onClick={toggle}
-            title={collapsed ? "Expandir menu" : "Minimizar menu"}
+            onClick={closeOrToggle}
+            title={toggleLabel}
+            aria-label={toggleLabel}
             className={cn(
               "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-chumbo-950",
-              collapsed && "mx-auto",
+              collapsedForRender && "mx-auto",
             )}
           >
-            <ChevronIcon dir={collapsed ? "right" : "left"} />
+            <ChevronIcon dir={collapsedForRender ? "right" : "left"} />
           </button>
         </div>
 
         {/* Nav */}
-        <nav className={cn("flex-1 overflow-y-auto py-1", collapsed ? "px-1" : "px-2")}>
+        <nav className={cn("flex-1 overflow-y-auto py-1", collapsedForRender ? "px-1" : "px-2")}>
           <ul className="flex flex-col gap-0.5">
             {mainItems.map((item) => (
               <NavRow
                 key={item.href}
                 item={item}
                 activePath={activePath}
-                collapsed={collapsed}
+                collapsed={collapsedForRender}
                 onNavigate={closeMobile}
               />
             ))}
@@ -346,13 +354,13 @@ export function Sidebar({
                         <button
                           type="button"
                           onClick={() => {
-                            if (collapsed) return;
+                            if (collapsedForRender) return;
                             setOpenGroups((s) => ({ ...s, [g.key]: !s[g.key] }));
                           }}
-                          title={collapsed ? g.label : undefined}
+                          title={collapsedForRender ? g.label : undefined}
                           className={cn(
-                            "relative flex w-full items-center rounded-md py-2 text-sm font-medium transition-colors",
-                            collapsed ? "justify-center px-1" : "gap-3 px-2",
+                            "relative flex min-h-11 w-full items-center rounded-md py-2 text-sm font-medium transition-colors md:min-h-0",
+                            collapsedForRender ? "justify-center px-1" : "gap-3 px-2",
                             // Grupo ativo recebe só realce sutil (negrito escuro);
                             // o vermelho forte fica reservado ao item-folha ativo.
                             active
@@ -361,7 +369,7 @@ export function Sidebar({
                           )}
                         >
                           {g.icon ?? DEFAULT_GROUP_ICON}
-                          {!collapsed && (
+                          {!collapsedForRender && (
                             <>
                               <span className="truncate">{g.label}</span>
                               <svg
@@ -382,13 +390,13 @@ export function Sidebar({
                           )}
                         </button>
                       </li>
-                      {(open || collapsed) &&
+                      {(open || collapsedForRender) &&
                         items.map((item) => (
                           <NavRow
                             key={item.href}
                             item={item}
                             activePath={activePath}
-                            collapsed={collapsed}
+                            collapsed={collapsedForRender}
                             nested
                             onNavigate={closeMobile}
                           />
@@ -402,20 +410,20 @@ export function Sidebar({
                       <button
                         type="button"
                         onClick={() => {
-                          if (collapsed) return;
+                          if (collapsedForRender) return;
                           setGroupOpen((o) => !o);
                         }}
-                        title={collapsed ? groupLabel : undefined}
+                        title={collapsedForRender ? groupLabel : undefined}
                         className={cn(
-                          "relative flex w-full items-center rounded-md py-2 text-sm font-medium transition-colors",
-                          collapsed ? "justify-center px-1" : "gap-3 px-2",
+                          "relative flex min-h-11 w-full items-center rounded-md py-2 text-sm font-medium transition-colors md:min-h-0",
+                          collapsedForRender ? "justify-center px-1" : "gap-3 px-2",
                           groupedActive
                             ? "font-semibold text-chumbo-950 hover:bg-nav-hover"
                             : "text-chumbo-700 hover:bg-nav-hover",
                         )}
                       >
                         {groupIcon}
-                        {!collapsed && (
+                        {!collapsedForRender && (
                           <>
                             <span className="truncate">{groupLabel}</span>
                             <svg
@@ -436,13 +444,13 @@ export function Sidebar({
                         )}
                       </button>
                     </li>
-                    {(groupOpen || collapsed) &&
+                    {(groupOpen || collapsedForRender) &&
                       groupedItems.map((item) => (
                         <NavRow
                           key={item.href}
                           item={item}
                           activePath={activePath}
-                          collapsed={collapsed}
+                          collapsed={collapsedForRender}
                           nested
                           onNavigate={closeMobile}
                         />
@@ -458,10 +466,10 @@ export function Sidebar({
         <div
           className={cn(
             "border-t border-chumbo-100 py-3",
-            collapsed ? "px-1" : "px-2",
+            collapsedForRender ? "px-1" : "px-2",
           )}
         >
-          {collapsed ? (
+          {collapsedForRender ? (
             <button
               type="button"
               onClick={handleLogout}
@@ -517,7 +525,7 @@ function NavRow({
   const isActive =
     activePath === item.href || (item.href !== "/" && activePath.startsWith(item.href));
   const base = cn(
-    "relative flex h-9 items-center rounded-lg text-sm font-medium transition-colors",
+    "relative flex h-9 min-h-11 items-center rounded-lg text-sm font-medium transition-colors md:min-h-0",
     collapsed ? "justify-center px-1" : nested ? "gap-3 px-2 pl-7" : "gap-3 px-2",
   );
 
