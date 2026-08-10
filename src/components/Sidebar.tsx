@@ -170,7 +170,7 @@ export function Sidebar({
   });
 
   const closeMobile = useCallback(() => setMobileOpen(false), [setMobileOpen]);
-  const collapsedForRender = collapsed;
+  const collapsedForRender = collapsed && !mobileOpen;
   const closeOrToggle = mobileOpen ? closeMobile : toggle;
   const toggleLabel = mobileOpen
     ? "Fechar menu"
