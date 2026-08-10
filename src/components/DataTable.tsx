@@ -229,7 +229,7 @@ export function DataTable<T>({
 													}
 													disabled={!canSort}
 													className={cn(
-														"inline-flex min-h-11 items-center gap-1 transition-colors md:min-h-0",
+														"inline-flex min-h-11 min-w-11 items-center gap-1 transition-colors md:min-h-0 md:min-w-0",
 														canSort && "cursor-pointer hover:text-chumbo-950",
 														!canSort && "cursor-default",
 													)}

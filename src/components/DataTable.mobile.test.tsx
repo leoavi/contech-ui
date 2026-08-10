@@ -23,8 +23,16 @@ describe("controles mobile da DataTable", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /Nome/ }).classList).toContain("min-h-11");
-    expect(screen.getByTitle("Filtrar coluna").classList).toContain("min-w-11");
+    const sortButton = screen.getByRole("button", { name: /Nome/ });
+    expect(sortButton.classList).toContain("min-h-11");
+    expect(sortButton.classList).toContain("min-w-11");
+    expect(sortButton.classList).toContain("md:min-h-0");
+    expect(sortButton.classList).toContain("md:min-w-0");
+    const filterButton = screen.getByTitle("Filtrar coluna");
+    expect(filterButton.classList).toContain("min-h-11");
+    expect(filterButton.classList).toContain("min-w-11");
+    expect(filterButton.classList).toContain("md:min-h-0");
+    expect(filterButton.classList).toContain("md:min-w-0");
     expect(container.querySelector(".overflow-x-auto")).toBeTruthy();
   });
 });
