@@ -24,6 +24,7 @@ describe("contrato mobile dos headers", () => {
     const extra = screen.getByRole("button", { name: "Ação A" }).parentElement?.parentElement;
     expect(extra?.classList).toContain("w-full");
     expect(extra?.className).toContain("max-md:[&>*]:flex-wrap");
+    expect(extra?.classList).not.toContain("[&>*]:flex-wrap");
     expect(extra?.className).not.toContain("md:[&>*]:flex-nowrap");
   });
 
