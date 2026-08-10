@@ -70,6 +70,8 @@ describe("drawer mobile da Sidebar", () => {
     expect(hamburger.classList).toContain("w-11");
     expect(drawer.classList).toContain("z-[60]");
     expect(drawer.classList).toContain("md:z-10");
+    expect(drawer.classList).toContain("visible");
+    expect(drawer.classList).toContain("md:visible");
     const backdrop = drawer.previousElementSibling as HTMLElement;
     expect(backdrop.getAttribute("aria-hidden")).toBe("true");
     expect(backdrop.classList).toContain("z-50");
@@ -87,10 +89,21 @@ describe("drawer mobile da Sidebar", () => {
     expect(groupedNav.classList).toContain("md:min-h-0");
   });
 
+  it("remove drawer fechado da ordem de foco sem afetar a visibilidade desktop", () => {
+    renderSidebar();
+    const drawer = document.querySelector("aside")!;
+    expect(drawer.classList).toContain("invisible");
+    expect(drawer.classList).toContain("md:visible");
+  });
+
   it("fecha pelo controle interno e devolve o foco ao opener", () => {
     renderSidebar();
     const { drawer, hamburger } = openDrawer();
     const closeButton = within(drawer).getByRole("button", { name: "Fechar menu" });
+    expect(closeButton.classList).toContain("h-11");
+    expect(closeButton.classList).toContain("w-11");
+    expect(closeButton.classList).toContain("md:h-8");
+    expect(closeButton.classList).toContain("md:w-8");
     expect(document.activeElement).toBe(closeButton);
     fireEvent.click(closeButton);
     expect(screen.queryByRole("dialog", { name: "Menu de navegação" })).toBeNull();
@@ -120,5 +133,22 @@ describe("drawer mobile da Sidebar", () => {
     fireEvent.click(within(drawer).getByRole("link", { name: "Início" }));
     expect(screen.queryByRole("dialog", { name: "Menu de navegação" })).toBeNull();
     expect(document.activeElement).toBe(hamburger);
+  });
+
+  it("mantém logout com alvo móvel e reset desktop", () => {
+    renderSidebar();
+    const { drawer } = openDrawer();
+    const logout = within(drawer).getByTitle("Sair");
+    expect(logout.classList).toContain("h-11");
+    expect(logout.classList).toContain("w-11");
+    expect(logout.classList).toContain("md:h-auto");
+    expect(logout.classList).toContain("md:w-auto");
+    expect(logout.classList).toContain("md:p-1.5");
+    fireEvent.click(within(drawer).getByRole("button", { name: "Fechar menu" }));
+    const collapsedLogout = screen.getByTitle("Sair");
+    expect(collapsedLogout.classList).toContain("h-11");
+    expect(collapsedLogout.classList).toContain("w-11");
+    expect(collapsedLogout.classList).toContain("md:h-8");
+    expect(collapsedLogout.classList).toContain("md:w-8");
   });
 });

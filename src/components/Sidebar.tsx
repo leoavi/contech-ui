@@ -298,8 +298,9 @@ export function Sidebar({
           // Mobile: drawer off-canvas w-72, z alto
           "z-[60] w-72",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
+          mobileOpen ? "visible" : "invisible",
           // Desktop (md+): EXATAMENTE o aside de sempre — fixo, z-10, w-10|w-60, sempre visível
-          "md:z-10 md:translate-x-0",
+          "md:z-10 md:translate-x-0 md:visible",
           desktopW,
         )}
       >
@@ -321,7 +322,7 @@ export function Sidebar({
             title={toggleLabel}
             aria-label={toggleLabel}
             className={cn(
-              "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-chumbo-950",
+              "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-chumbo-950 md:h-8 md:w-8",
               collapsedForRender && "mx-auto",
             )}
           >
@@ -474,7 +475,7 @@ export function Sidebar({
               type="button"
               onClick={handleLogout}
               title="Sair"
-              className="mx-auto flex h-8 w-8 items-center justify-center rounded-md text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-negative"
+              className="mx-auto flex h-11 w-11 items-center justify-center rounded-md text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-negative md:h-8 md:w-8"
             >
               <LogoutIcon />
             </button>
@@ -495,7 +496,7 @@ export function Sidebar({
                 type="button"
                 onClick={handleLogout}
                 title="Sair"
-                className="flex-shrink-0 rounded-md p-1.5 text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-negative"
+                className="h-11 w-11 flex-shrink-0 rounded-md p-1.5 text-chumbo-500 transition-colors hover:bg-nav-hover hover:text-negative md:h-auto md:w-auto md:p-1.5"
               >
                 <LogoutIcon small />
               </button>

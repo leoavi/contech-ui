@@ -14,20 +14,20 @@ export function Section({ title, description, action, children, className }: Sec
     <section className={cn("flex flex-col gap-4", className)}>
       {(title || action) && (
         <div className="flex min-w-0 flex-col items-stretch gap-3 md:flex-row md:items-end md:justify-between md:gap-4">
-          <div className="flex items-start gap-2">
+          <div className="flex min-w-0 items-start gap-2">
             {title && (
               <div
                 className="mt-1 w-[3px] self-stretch rounded-full bg-bordo-700"
                 aria-hidden
               />
             )}
-            <div>
+            <div className="min-w-0">
               {title && (
-                <h2 className="font-display text-lg font-bold uppercase tracking-wide text-chumbo-800">
+                <h2 className="break-words font-display text-lg font-bold uppercase tracking-wide text-chumbo-800">
                   {title}
                 </h2>
               )}
-              {description && <p className="mt-1 text-sm text-chumbo-500">{description}</p>}
+              {description && <p className="mt-1 break-words text-sm text-chumbo-500">{description}</p>}
             </div>
           </div>
           {action}

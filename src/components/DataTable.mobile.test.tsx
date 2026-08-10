@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { DataTable, type DataTableColumn } from "./DataTable";
 
@@ -34,5 +34,17 @@ describe("controles mobile da DataTable", () => {
     expect(filterButton.classList).toContain("md:min-h-0");
     expect(filterButton.classList).toContain("md:min-w-0");
     expect(container.querySelector(".overflow-x-auto")).toBeTruthy();
+
+    fireEvent.click(filterButton);
+    const input = screen.getByPlaceholderText("Filtrar...");
+    expect(input.classList).toContain("min-h-11");
+    expect(input.classList).toContain("text-base");
+    expect(input.classList).toContain("md:min-h-0");
+    expect(input.classList).toContain("md:text-xs");
+    fireEvent.change(input, { target: { value: "Ana" } });
+    const clear = screen.getByRole("button", { name: "Limpar filtro" });
+    expect(clear.classList).toContain("min-h-11");
+    expect(clear.classList).toContain("md:min-h-0");
+    fireEvent.click(clear);
   });
 });

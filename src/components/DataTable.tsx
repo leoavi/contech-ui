@@ -714,7 +714,7 @@ function FilterPopover<T>({
 								onChange={(e) =>
 									column.setFilterValue(e.target.value || undefined)
 								}
-								className="w-full rounded border border-chumbo-100 bg-offwhite px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none"
+								className="w-full min-h-11 rounded border border-chumbo-100 bg-offwhite px-2 py-1 text-base text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none md:min-h-0 md:text-xs"
 							/>
 						)}
 						{type === "select" && (
@@ -723,7 +723,7 @@ function FilterPopover<T>({
 								onChange={(e) =>
 									column.setFilterValue(e.target.value || undefined)
 								}
-								className="w-full rounded border border-chumbo-100 bg-offwhite px-2 py-1 text-xs text-chumbo-950 focus:border-bordo-700 focus:outline-none"
+								className="w-full min-h-11 rounded border border-chumbo-100 bg-offwhite px-2 py-1 text-base text-chumbo-950 focus:border-bordo-700 focus:outline-none md:min-h-0 md:text-xs"
 								style={{ colorScheme: "dark" }}
 							>
 								<option value="">Todos</option>
@@ -751,7 +751,7 @@ function FilterPopover<T>({
 										];
 										column.setFilterValue([min, current[1]]);
 									}}
-									className="w-full rounded border border-chumbo-100 bg-white px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none"
+									className="w-full min-h-11 rounded border border-chumbo-100 bg-white px-2 py-1 text-base text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none md:min-h-0 md:text-xs"
 								/>
 								<input
 									type="number"
@@ -768,7 +768,7 @@ function FilterPopover<T>({
 										];
 										column.setFilterValue([current[0], max]);
 									}}
-									className="w-full rounded border border-chumbo-100 bg-white px-2 py-1 text-xs text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none"
+									className="w-full min-h-11 rounded border border-chumbo-100 bg-white px-2 py-1 text-base text-chumbo-950 placeholder:text-chumbo-300 focus:border-bordo-700 focus:outline-none md:min-h-0 md:text-xs"
 								/>
 							</div>
 						)}
@@ -780,7 +780,7 @@ function FilterPopover<T>({
 									column.setFilterValue(undefined);
 									close();
 								}}
-								className="mt-2 w-full rounded bg-chumbo-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-chumbo-700 hover:bg-chumbo-100/70"
+								className="mt-2 min-h-11 w-full rounded bg-chumbo-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-chumbo-700 hover:bg-chumbo-100/70 md:min-h-0"
 							>
 								Limpar filtro
 							</button>

@@ -1,7 +1,7 @@
 name: CI
 
 # Roda em todo push pra main e em todo PR.
-# Só types — biblioteca sem testes próprios por enquanto.
+# Verifica tipos e suíte de testes.
 # Sem secrets, funciona em fork PRs.
 
 on:
@@ -20,4 +20,5 @@ jobs:
           node-version: "20"
           cache: "npm"
       - run: npm ci
+      - run: npm test
       - run: npx tsc --noEmit

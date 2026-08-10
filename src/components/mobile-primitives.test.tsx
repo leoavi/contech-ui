@@ -11,17 +11,21 @@ afterEach(cleanup);
 
 describe("contrato mobile dos headers", () => {
   it("PageHeader declara empilhamento mobile sem forcar wrap no desktop", () => {
+    const longToken = "tokensuperlongosemespacosquenaopodevazardocontainer";
     const { container } = render(
       <PageHeader
-        area="Gestão"
-        title="Título muito longo"
+        area={longToken}
+        title={longToken}
+        description={longToken}
         extra={<div className="flex"><button>Ação A</button><button>Ação B</button></div>}
       />,
     );
     const header = container.querySelector("header")!;
     expect(header.classList).toContain("flex-col");
     expect(header.classList).toContain("md:flex-row");
-    expect(screen.getByText("Título muito longo").parentElement?.classList).toContain("min-w-0");
+    const headerTexts = screen.getAllByText(longToken);
+    expect(headerTexts).toHaveLength(3);
+    headerTexts.forEach((text) => expect(text.classList).toContain("break-words"));
     const extra = screen.getByRole("button", { name: "Ação A" }).parentElement?.parentElement;
     expect(extra?.classList).toContain("w-full");
     expect(extra?.className).toContain("max-md:[&>*]:flex-wrap");
@@ -30,10 +34,14 @@ describe("contrato mobile dos headers", () => {
   });
 
   it("Section empilha acao no mobile", () => {
-    const { container } = render(<Section title="Seção" action={<button>Ação</button>}>x</Section>);
+    const longToken = "tokensuperlongosemespacosquenaopodevazardocontainer";
+    const { container } = render(<Section title={longToken} description={longToken} action={<button>Ação</button>}>x</Section>);
     const header = container.querySelector("section > div")!;
     expect(header.classList).toContain("flex-col");
     expect(header.classList).toContain("md:flex-row");
+    expect(screen.getByText(longToken, { selector: "h2" }).classList).toContain("break-words");
+    expect(screen.getByText(longToken, { selector: "p" }).classList).toContain("break-words");
+    expect(screen.getByText(longToken, { selector: "h2" }).parentElement?.classList).toContain("min-w-0");
   });
 });
 
