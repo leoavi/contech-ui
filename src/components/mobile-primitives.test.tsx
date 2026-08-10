@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { Input } from "./Input";
+import { MainContent } from "./MainContent";
 import { PageHeader } from "./PageHeader";
 import { Section } from "./Section";
 import { Select } from "./Select";
@@ -50,4 +51,14 @@ describe.each([
     }
     if (name !== "textarea") expect(el.classList).toContain("min-h-11");
   });
+});
+
+it("MainContent contém o documento sem recortar scrollers internos", () => {
+  const { container } = render(<MainContent hasSidebar={false}>conteúdo</MainContent>);
+  const main = container.querySelector("main")!;
+
+  for (const token of ["min-w-0", "max-w-full", "overflow-x-clip"]) {
+    expect(main.classList).toContain(token);
+  }
+  expect(main.firstElementChild?.classList).toContain("min-w-0");
 });

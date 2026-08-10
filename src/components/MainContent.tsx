@@ -32,9 +32,9 @@ export function MainContent({
     : "ml-0";
   return (
     <main
-      className={`min-h-screen ${paddingX} pt-14 pb-24 md:pt-8 transition-all duration-200 ease-in-out print:ml-0 print:px-0 print:pb-0 ${marginL}`}
+      className={`min-h-screen min-w-0 max-w-full overflow-x-clip ${paddingX} pt-14 pb-24 md:pt-8 transition-all duration-200 ease-in-out print:ml-0 print:px-0 print:pb-0 ${marginL}`}
     >
-      <div className="mx-auto max-w-[1700px]">{children}</div>
+      <div className="mx-auto min-w-0 max-w-[1700px]">{children}</div>
     </main>
   );
 }
