@@ -9,7 +9,7 @@ import { Textarea } from "./Textarea";
 afterEach(cleanup);
 
 describe("contrato mobile dos headers", () => {
-  it("PageHeader empilha no mobile e deixa texto e acoes encolherem", () => {
+  it("PageHeader declara empilhamento mobile sem forcar wrap no desktop", () => {
     const { container } = render(
       <PageHeader
         area="Gestão"
@@ -23,7 +23,8 @@ describe("contrato mobile dos headers", () => {
     expect(screen.getByText("Título muito longo").parentElement?.classList).toContain("min-w-0");
     const extra = screen.getByRole("button", { name: "Ação A" }).parentElement?.parentElement;
     expect(extra?.classList).toContain("w-full");
-    expect(extra?.className).toContain("[&>*]:flex-wrap");
+    expect(extra?.className).toContain("max-md:[&>*]:flex-wrap");
+    expect(extra?.className).not.toContain("md:[&>*]:flex-nowrap");
   });
 
   it("Section empilha acao no mobile", () => {
@@ -39,7 +40,7 @@ describe.each([
   ["select", <Select aria-label="select"><option>x</option></Select>],
   ["textarea", <Textarea aria-label="textarea" />],
 ])("contrato mobile de %s", (name, control) => {
-  it("usa 16px, 44px e contem largura no mobile", () => {
+  it("declara o contrato de classes para mobile", () => {
     render(control);
     const role = name === "textarea" ? "textbox" : name === "select" ? "combobox" : "textbox";
     const el = screen.getByRole(role);

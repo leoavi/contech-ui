@@ -22,7 +22,7 @@ export function PageHeader({ area, title, description, extra }: Props) {
         </div>
       </div>
       {extra && (
-        <div className="min-w-0 w-full [&>*]:min-w-0 [&>*]:max-w-full [&>*]:flex-wrap md:w-auto md:flex-shrink-0">
+        <div className="min-w-0 w-full [&>*]:min-w-0 [&>*]:max-w-full max-md:[&>*]:flex-wrap md:w-auto md:flex-shrink-0">
           {extra}
         </div>
       )}
