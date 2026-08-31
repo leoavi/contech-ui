@@ -1,12 +1,14 @@
 "use client";
 
 import {
-  Fragment,
+  cloneElement,
+  isValidElement,
   useCallback,
   useEffect,
   useId,
   useRef,
   useState,
+  type ReactElement,
   type ReactNode,
 } from "react";
 import Link from "next/link";
@@ -123,6 +125,14 @@ function getFocusable(container: HTMLElement): HTMLElement[] {
     if (style.display === "none" || style.visibility === "hidden") return false;
     return true;
   });
+}
+
+
+function withStableKey(node: ReactNode, key: string): ReactNode {
+  if (isValidElement(node)) {
+    return cloneElement(node as ReactElement, { key });
+  }
+  return node;
 }
 
 export function Sidebar({
@@ -344,14 +354,14 @@ export function Sidebar({
             ))}
 
             {multiGroup
-              ? groups?.map((g) => {
+              ? (groups ?? [])
+                  .filter((g) => accessibleItems.some((it) => it.group === g.key))
+                  .flatMap((g) => {
                   const items = accessibleItems.filter((it) => it.group === g.key);
-                  if (items.length === 0) return null;
                   const active = items.some(itemAtivo);
                   const open = openGroups[g.key] ?? false;
-                  return (
-                    <Fragment key={g.key}>
-                      <li>
+                  const header = (
+                      <li key={`${g.key}__header`}>
                         <button
                           type="button"
                           onClick={() => {
@@ -369,7 +379,7 @@ export function Sidebar({
                               : "text-chumbo-700 hover:bg-nav-hover",
                           )}
                         >
-                          {g.icon ?? DEFAULT_GROUP_ICON}
+                          {withStableKey(g.icon ?? DEFAULT_GROUP_ICON, `${g.key}__icon`)}
                           {!collapsedForRender && (
                             <>
                               <span className="truncate">{g.label}</span>
@@ -391,8 +401,11 @@ export function Sidebar({
                           )}
                         </button>
                       </li>
-                      {(open || collapsedForRender) &&
-                        items.map((item) => (
+                  );
+                  if (!(open || collapsedForRender)) return [header];
+                  return [
+                    header,
+                    ...items.map((item) => (
                           <NavRow
                             key={item.href}
                             item={item}
@@ -401,9 +414,8 @@ export function Sidebar({
                             nested
                             onNavigate={closeMobile}
                           />
-                        ))}
-                    </Fragment>
-                  );
+                    )),
+                  ];
                 })
               : hasGrouped && (
                   <>
@@ -537,7 +549,7 @@ function NavRow({
           title={collapsed ? item.label : undefined}
           className={cn(base, "cursor-not-allowed text-chumbo-500/50")}
         >
-          {item.icon}
+          {withStableKey(item.icon, `${item.href}__icon`)}
           {!collapsed && (
             <>
               <span className="truncate">{item.label}</span>
@@ -565,7 +577,7 @@ function NavRow({
         )}
       >
         <span className={cn("flex-shrink-0", isActive && "text-on-bordo")}>
-          {item.icon}
+          {withStableKey(item.icon, `${item.href}__icon`)}
         </span>
         {!collapsed && <span className="truncate">{item.label}</span>}
       </Link>
